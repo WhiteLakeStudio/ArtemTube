@@ -3,44 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Pro Max 2.0</title>
+    <title>KidsTV Ultimate Fixed</title>
     <style>
         :root { --bg: #0a0a0a; --card: #161616; --accent: #ff004c; --text: #fff; }
-        
         * { box-sizing: border-box; }
 
         body, html { 
             margin: 0; padding: 0; 
             background: var(--bg); color: var(--text); 
             font-family: 'Segoe UI', sans-serif; 
-            height: 100%; overflow: hidden; /* Прибираємо головний скрол */
+            height: 100vh; width: 100vw; overflow: hidden; 
         }
         
         .app-wrap { display: flex; flex-direction: column; height: 100vh; }
 
-        /* ПЛЕЄР */
+        /* ПЛЕЄР КОНТЕЙНЕР */
         .video-container { 
             width: 100%; background: #000; 
-            flex-shrink: 0; /* Не даємо йому стискатися */
+            display: flex; flex-direction: column;
         }
-        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; }
+        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         
         .actions { 
-            padding: 12px; display: flex; justify-content: center; 
-            background: var(--bg); border-bottom: 1px solid #222; 
+            padding: 10px; display: flex; justify-content: center; 
+            background: var(--bg); border-bottom: 1px solid #222;
         }
         .btn-magic { 
             background: linear-gradient(90deg, #ff004c, #ff6a00); 
-            border: none; color: white; padding: 14px; border-radius: 12px; 
+            border: none; color: white; padding: 15px; border-radius: 12px; 
             font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; 
-            cursor: pointer; text-transform: uppercase;
+            cursor: pointer; text-transform: uppercase; transition: 0.2s;
         }
+        .btn-magic:active { transform: scale(0.98); }
 
         /* СПИСОК */
         .side-content { 
-            flex-grow: 1; 
-            overflow-y: auto; /* Скрол тільки тут */
+            flex: 1; overflow-y: auto; 
             -webkit-overflow-scrolling: touch;
         }
         .playlist { padding: 10px; }
@@ -50,15 +49,17 @@
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
         .card-title { padding: 6px; font-size: 11px; height: 30px; overflow: hidden; color: #ccc; line-height: 1.2; }
 
-        /* АДАПТИВ ДЛЯ ПК */
+        /* ПК ВЕРСІЯ: ВИПРАВЛЕННЯ ЗАРІЗАННЯ */
         @media (min-width: 1024px) {
             .app-wrap { flex-direction: row; }
             .video-container { 
                 width: 75%; height: 100vh; 
-                display: flex; flex-direction: column; justify-content: center; 
-                border-right: 1px solid #222; 
+                justify-content: space-between; /* Кнопка завжди внизу */
+                padding-bottom: 20px;
             }
-            .side-content { width: 25%; height: 100vh; }
+            .ratio { padding-bottom: 0; flex: 1; } /* Плеєр розтягується на весь залишок */
+            
+            .side-content { width: 25%; height: 100vh; border-left: 1px solid #222; }
             .grid { grid-template-columns: 1fr; padding: 15px; }
             .card { 
                 display: flex; gap: 10px; border: none; 
@@ -84,7 +85,7 @@
     <div class="side-content">
         <div class="playlist">
             <div id="grid" class="grid">
-                <p id="loader" style="text-align: center; padding: 20px; color: #666;">Потяги вже на підході...</p>
+                <p id="loader" style="text-align: center; padding: 20px; color: #666;">Завантажуємо...</p>
             </div>
         </div>
     </div>
@@ -97,7 +98,6 @@
     async function loadFeed() {
         for (const id of channels) {
             try {
-                // Використовуємо перевірений rss2json
                 const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id=' + id)}`);
                 const data = await res.json();
                 if (data.items) {
@@ -110,14 +110,10 @@
                 }
             } catch (e) { console.log("Skip"); }
         }
-
         if (videoData.length > 0) {
-            // Твій улюблений рандом
             videoData.sort(() => Math.random() - 0.5);
             render();
             play(videoData[0].id, false);
-        } else {
-            document.getElementById('grid').innerHTML = "<p style='padding:20px; text-align:center;'>Упс! Помилка завантаження. Спробуй оновити.</p>";
         }
     }
 
@@ -132,17 +128,11 @@
 
     function play(id, shouldScroll) {
         document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
-        // На телефоні скролимо вгору до плеєра, на ПК — ні
-        if (shouldScroll && window.innerWidth < 1024) {
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+        if (shouldScroll && window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     function playRandom() {
-        if (videoData.length > 0) {
-            const rand = videoData[Math.floor(Math.random() * videoData.length)];
-            play(rand.id, true);
-        }
+        if (videoData.length > 0) play(videoData[Math.floor(Math.random() * videoData.length)].id, true);
     }
 
     loadFeed();
