@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Armor Edition</title>
+    <title>KidsTV Armor Pro</title>
     <style>
         :root { 
             --bg: #0f1015; --card: #1f2128; --accent: #00f2ff; 
@@ -13,7 +13,8 @@
 
         body, html { 
             margin: 0; padding: 0; background: var(--bg); color: var(--text); 
-            font-family: 'Segoe UI', Roboto, sans-serif; height: 100vh; width: 100vw; overflow: hidden;
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            height: 100vh; width: 100vw; overflow: hidden;
         }
         
         .app-wrap { display: flex; flex-direction: column; height: 100vh; }
@@ -38,7 +39,6 @@
             position: absolute; top: 15px; right: 15px; width: 45px; height: 45px;
             background: #fff; color: #000; border-radius: 50%; font-size: 28px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;
-            box-shadow: 0 0 20px rgba(255,255,255,0.3);
         }
         .overlay-title { font-size: 22px; margin-bottom: 20px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
         .rec-row { display: flex; gap: 15px; width: 100%; overflow-x: auto; padding: 10px; }
@@ -46,7 +46,6 @@
         .rec-card { flex: 0 0 160px; border-radius: 15px; overflow: hidden; border: 3px solid #333; }
         .rec-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
 
-        /* КНОПКА ВИХОДУ З FS (Тільки для Fullscreen) */
         #exit-fs {
             position: absolute; top: 20px; left: 20px; z-index: 101;
             background: rgba(255,255,255,0.2); color: white; border: 1px solid white;
@@ -76,17 +75,25 @@
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
         .card-info { padding: 10px; font-size: 13px; height: 50px; overflow: hidden; }
 
+        /* --- ВАЖЛИВИЙ ФІКС ДЛЯ ГОРИЗОНТАЛЬНОГО РЕЖИМУ --- */
+        @media (max-height: 600px) and (orientation: landscape) {
+            body, html { overflow-y: auto; height: auto; }
+            .app-wrap { height: auto; overflow: visible; }
+            .scroll-area { overflow-y: visible; }
+            /* Плеєр залишається зверху, але дозволяє скролити контент під ним */
+            .video-section { position: relative; }
+        }
+
         @media (min-width: 1024px) {
-            .app-wrap { flex-direction: row; }
+            .app-wrap { flex-direction: row; height: 100vh; overflow: hidden; }
             .video-section { width: 75%; height: 100vh; }
             .ratio { height: calc(100vh - 100px); padding-bottom: 0; }
-            .scroll-area { width: 25%; border-left: 1px solid #222; }
+            .scroll-area { width: 25%; border-left: 1px solid #222; height: 100vh; overflow-y: auto; }
             .grid { grid-template-columns: 1fr; }
             .card { display: flex; align-items: center; }
             .card img { width: 130px; }
         }
 
-        /* Стиль для Fullscreen */
         :fullscreen .ratio { width: 100vw; height: 100vh; padding: 0; }
         :fullscreen #exit-fs { display: block; }
     </style>
@@ -98,9 +105,7 @@
         <div class="ratio" id="player-box">
             <iframe id="main-player" src="" allow="autoplay; fullscreen"></iframe>
             <div class="video-shield" onclick="togglePlay()"></div>
-            
             <div id="exit-fs" onclick="toggleFS()">✕ ВИЙТИ</div>
-
             <div id="custom-overlay">
                 <div class="close-overlay" onclick="closeOverlay()">✕</div>
                 <div class="overlay-title">Вибирай мультик:</div>
@@ -133,7 +138,8 @@
     let currentIndex = 0;
 
     async function loadFeed() {
-        document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:20px;color:var(--accent)">Завантаження...</p>';
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '<p style="text-align:center;padding:20px;color:var(--accent)">Завантаження...</p>';
         let allVideos = []; 
         for (const id of channels) {
             try {
@@ -205,15 +211,12 @@
     function toggleFS() {
         const el = document.getElementById('player-box');
         if (!document.fullscreenElement) {
-            el.requestFullscreen().catch(err => {
-                alert("Помилка входу в повний екран");
-            });
+            el.requestFullscreen().catch(err => {});
         } else {
             document.exitFullscreen();
         }
     }
 
-    // Відстеження виходу через ESC
     document.addEventListener('fullscreenchange', () => {
         const btn = document.getElementById('exit-fs');
         btn.style.display = document.fullscreenElement ? 'block' : 'none';
