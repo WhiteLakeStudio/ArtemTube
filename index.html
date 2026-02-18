@@ -90,22 +90,16 @@
 
 <script>
     const channels = [
-        'UCiDMw6_5dn59S8S-S_Vr23A', 
-        'UC0Vf_i2h75sJM13bD9LixIg', 
-        'UCcrAG9d_PifNP78aaJe5S2A', 
-        'UC_8PAD0Qmi6_gpe77S1Atgg', 
-        'UCcartHVtvAUzfajflyeT_Gg', 
-        'UCBw2WWpuadpPQKVKNZilDkg',
-        'UCyWkpcB25Hr2oN7uRlsNg5g',
-        'UCCIqROlnqhmQPjbdv3e8scQ',
-        'UCifNwVEEXhG26Z__VXrrcwQ'
+        'UCiDMw6_5dn59S8S-S_Vr23A', 'UC0Vf_i2h75sJM13bD9LixIg', 'UCcrAG9d_PifNP78aaJe5S2A', 
+        'UC_8PAD0Qmi6_gpe77S1Atgg', 'UCcartHVtvAUzfajflyeT_Gg', 'UCBw2WWpuadpPQKVKNZilDkg',
+        'UCyWkpcB25Hr2oN7uRlsNg5g', 'UCCIqROlnqhmQPjbdv3e8scQ', 'UCifNwVEEXhG26Z__VXrrcwQ'
     ];
     let videoData = [];
 
     async function loadFeed() {
         const grid = document.getElementById('grid');
         grid.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Оновлюємо список...</p>';
-        videoData = []; 
+        let allVideos = []; 
 
         for (const id of channels) {
             try {
@@ -115,8 +109,8 @@
                     data.items.forEach(item => {
                         const vId = item.link.split('v=')[1];
                         if (vId && !item.title.toLowerCase().includes("shorts")) {
-                            if (!videoData.find(v => v.id === vId)) {
-                                videoData.push({ id: vId, title: item.title, thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg` });
+                            if (!allVideos.find(v => v.id === vId)) {
+                                allVideos.push({ id: vId, title: item.title, thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg` });
                             }
                         }
                     });
@@ -124,11 +118,18 @@
             } catch (e) { console.log("Skip channel"); }
         }
 
-        if (videoData.length > 0) {
-            // Чесний рандом
-            videoData.sort(() => Math.random() - 0.5);
+        if (allVideos.length > 0) {
+            // ПЕРЕМІШУЄМО ВСЕ
+            allVideos.sort(() => Math.random() - 0.5);
+            
+            // БЕРЕМО ТІЛЬКИ ПЕРШІ 30 ВІДЕО
+            videoData = allVideos.slice(0, 30);
+            
             render();
-            if (!document.getElementById('main-player').src || document.getElementById('main-player').src.includes("about:blank")) {
+
+            // Автозапуск першого відео тільки при першому завантаженні
+            const player = document.getElementById('main-player');
+            if (!player.src || player.src.includes("about:blank") || player.src === window.location.href) {
                 play(videoData[0].id, false);
             }
         } else {
@@ -146,7 +147,10 @@
     }
 
     function play(id, shouldScroll) {
-        document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+        // rel=0 показує рекомендації лише з цього ж каналу
+        // iv_load_policy=3 прибирає спливаючі анотації
+        document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&controls=1`;
+        
         if (shouldScroll && window.innerWidth < 1024) {
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
@@ -163,5 +167,3 @@
 </script>
 </body>
 </html>
-
-
