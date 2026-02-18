@@ -3,29 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KidsTV Pro Max</title>
+    <title>KidsTV Pro Max 2.0</title>
     <style>
         :root { --bg: #0a0a0a; --card: #161616; --accent: #ff004c; --text: #fff; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
-        .video-container { width: 100%; background: #000; }
+        
+        .app-wrap { display: flex; flex-direction: column; }
+
+        /* ПЛЕЄР */
+        .video-container { width: 100%; background: #000; position: sticky; top: 0; z-index: 1000; }
         .ratio { position: relative; width: 100%; padding-bottom: 56.25%; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        .actions { padding: 15px; display: flex; justify-content: center; background: var(--bg); }
+        
+        .actions { padding: 15px; display: flex; justify-content: center; background: var(--bg); border-bottom: 1px solid #222; }
         .btn-magic { 
             background: linear-gradient(90deg, #ff004c, #ff6a00); 
             border: none; color: white; padding: 16px; border-radius: 12px; 
             font-size: 18px; font-weight: bold; width: 100%; max-width: 500px; 
             cursor: pointer; box-shadow: 0 4px 15px rgba(255, 0, 76, 0.3); text-transform: uppercase;
         }
+
         .playlist { padding: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-        .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; border: 1px solid #222; }
+        .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; border: 1px solid #222; transition: 0.2s; }
+        .card:active { transform: scale(0.96); }
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
         .card-title { padding: 8px; font-size: 12px; height: 32px; overflow: hidden; color: #ccc; line-height: 1.3; }
 
+        /* ПК ВЕРСІЯ */
         @media (min-width: 1024px) {
-            .app-wrap { display: flex; height: 100vh; }
-            .video-container { width: 70%; height: 100vh; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #222; }
+            .app-wrap { flex-direction: row; height: 100vh; }
+            .video-container { width: 70%; height: 100vh; position: relative; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #222; }
             .side-content { width: 30%; overflow-y: auto; background: #080808; }
             .grid { grid-template-columns: 1fr; padding: 15px; }
             .card { display: flex; gap: 10px; border: none; background: transparent; padding-bottom: 10px; border-bottom: 1px solid #222; border-radius: 0; }
@@ -46,47 +54,72 @@
         </div>
     </div>
     <div class="side-content">
-        <div class="playlist"><div id="grid" class="grid"></div></div>
+        <div class="playlist">
+            <div id="grid" class="grid">
+                <p id="loader" style="text-align: center; padding: 20px;">Завантаження потягів...</p>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    const channels = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
+    // Масив каналів
+    const channels = [
+        'UCiDMw6_5dn59S8S-S_Vr23A', 
+        'UC0Vf_i2h75sJM13bD9LixIg', 
+        'UCcrAG9d_PifNP78aaJe5S2A'
+    ];
+    
     let videoData = [];
 
     async function loadFeed() {
+        const grid = document.getElementById('grid');
+        
         for (const id of channels) {
             try {
+                // Використовуємо count=50, щоб спробувати отримати більше відео
                 const rss = `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`;
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`);
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=50`);
                 const data = await res.json();
                 
                 if (data.items) {
                     data.items.forEach(item => {
                         const vId = item.link.split('v=')[1];
-                        // Фільтруємо Shorts (зазвичай короткі назви або специфічні теги) та порожні ID
-                        if (vId && !item.title.toLowerCase().includes("#shorts")) {
-                            videoData.push({
-                                id: vId,
-                                title: item.title,
-                                thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg`
-                            });
+                        const title = item.title.toLowerCase();
+                        
+                        // Покращена фільтрація Shorts та сміття
+                        if (vId && !title.includes("#shorts") && !title.includes("shorts")) {
+                            // Перевіряємо, чи такого відео ще немає в списку
+                            if (!videoData.find(v => v.id === vId)) {
+                                videoData.push({
+                                    id: vId,
+                                    title: item.title,
+                                    thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg`
+                                });
+                            }
                         }
                     });
                 }
-            } catch (e) { console.error("RSS error"); }
+            } catch (e) { console.error("RSS error for channel " + id); }
         }
 
         if (videoData.length > 0) {
-            // ПОВНА РАНДОМІЗАЦІЯ ПРИ ЗАВАНТАЖЕННІ
-            videoData = videoData.sort(() => Math.random() - 0.5);
+            // ФІШЕР-ЙЕЙТС РАНДОМІЗАЦІЯ (набагато краща за sort)
+            for (let i = videoData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [videoData[i], videoData[j]] = [videoData[j], videoData[i]];
+            }
+            
             render();
             play(videoData[0].id, false);
+        } else {
+            grid.innerHTML = "<p>Мультики десь затримались... Спробуй оновити.</p>";
         }
     }
 
     function render() {
-        document.getElementById('grid').innerHTML = videoData.map(v => `
+        const grid = document.getElementById('grid');
+        grid.innerHTML = videoData.map(v => `
             <div class="card" onclick="play('${v.id}', true)">
                 <img src="${v.thumb}" onerror="this.parentElement.style.display='none'">
                 <div class="card-title">${v.title}</div>
@@ -95,18 +128,21 @@
     }
 
     function play(id, shouldScroll) {
-        // Параметр rel=0 та modestbranding прибирають зайве сміття
-        document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&showinfo=0`;
+        const player = document.getElementById('main-player');
+        player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3`;
+        
         if (shouldScroll && window.innerWidth < 1024) {
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
     }
 
     function playRandom() {
+        if (videoData.length === 0) return;
         const rand = videoData[Math.floor(Math.random() * videoData.length)];
-        if (rand) play(rand.id, true);
+        play(rand.id, true);
     }
 
+    // Запуск
     loadFeed();
 </script>
 </body>
