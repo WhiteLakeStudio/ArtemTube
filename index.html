@@ -3,15 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Ultimate Armor</title>
+    <title>KidsTV Armor Edition</title>
     <style>
         :root { 
-            --bg: #0f1015; 
-            --card: #1f2128; 
-            --accent: #00f2ff; 
-            --play-btn: #ff0055; 
-            --text: #ffffff; 
-            --radius: 20px;
+            --bg: #0f1015; --card: #1f2128; --accent: #00f2ff; 
+            --play-btn: #ff0055; --text: #ffffff; --radius: 20px;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -27,7 +23,7 @@
             width: 100%; background: #000; position: relative; flex-shrink: 0; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10;
         }
-        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; }
+        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
         /* ЗАХИСНИЙ ОВЕРЛЕЙ */
@@ -35,20 +31,28 @@
         
         #custom-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100; display: none;
+            background: rgba(0,0,0,0.92); z-index: 100; display: none;
             flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
         .close-overlay {
-            position: absolute; top: 15px; right: 15px; width: 40px; height: 40px;
-            background: #fff; color: #000; border-radius: 50%; font-size: 24px;
+            position: absolute; top: 15px; right: 15px; width: 45px; height: 45px;
+            background: #fff; color: #000; border-radius: 50%; font-size: 28px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
         }
         .overlay-title { font-size: 22px; margin-bottom: 20px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
-        .rec-row { display: flex; gap: 15px; width: 100%; overflow-x: auto; padding: 10px; scroll-bar-width: none; }
+        .rec-row { display: flex; gap: 15px; width: 100%; overflow-x: auto; padding: 10px; }
         .rec-row::-webkit-scrollbar { display: none; }
-        .rec-card { flex: 0 0 160px; border-radius: 15px; overflow: hidden; border: 3px solid #333; transition: 0.2s; }
-        .rec-card:active { border-color: var(--accent); transform: scale(0.95); }
+        .rec-card { flex: 0 0 160px; border-radius: 15px; overflow: hidden; border: 3px solid #333; }
         .rec-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+
+        /* КНОПКА ВИХОДУ З FS (Тільки для Fullscreen) */
+        #exit-fs {
+            position: absolute; top: 20px; left: 20px; z-index: 101;
+            background: rgba(255,255,255,0.2); color: white; border: 1px solid white;
+            padding: 10px 20px; border-radius: 30px; cursor: pointer; display: none;
+            backdrop-filter: blur(5px); font-weight: bold;
+        }
 
         /* ПУЛЬТ КЕРУВАННЯ */
         .controls-panel {
@@ -59,39 +63,32 @@
             background: #2a2d37; border: none; color: white;
             width: 55px; height: 55px; border-radius: 18px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 20px; transition: 0.2s;
-            box-shadow: 0 4px 0 #15161a;
+            cursor: pointer; font-size: 20px; box-shadow: 0 4px 0 #15161a;
         }
         .c-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #15161a; }
-        .c-btn.play { background: var(--play-btn); width: 75px; font-size: 26px; box-shadow: 0 4px 0 #990033; }
-        .c-btn.fs { background: #444; font-size: 18px; }
+        .c-btn.play { background: var(--play-btn); width: 80px; font-size: 28px; box-shadow: 0 4px 0 #990033; }
+        .c-btn.fs { background: #444; font-size: 20px; color: var(--accent); }
 
         /* СПИСОК ВІДЕО */
-        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; background: var(--bg); }
+        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .card { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid #2a2d37; }
-        .card:active { transform: scale(0.97); }
+        .card { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; border: 1px solid #2a2d37; }
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .card-info { padding: 10px; font-size: 13px; font-weight: 500; height: 50px; overflow: hidden; line-height: 1.3; }
+        .card-info { padding: 10px; font-size: 13px; height: 50px; overflow: hidden; }
 
-        /* ДИЗАЙН ДЛЯ ПК */
         @media (min-width: 1024px) {
             .app-wrap { flex-direction: row; }
-            .video-section { width: 75%; height: 100vh; border-bottom: none; }
-            .ratio { flex-grow: 1; padding-bottom: 0; height: calc(100vh - 100px); }
+            .video-section { width: 75%; height: 100vh; }
+            .ratio { height: calc(100vh - 100px); padding-bottom: 0; }
             .scroll-area { width: 25%; border-left: 1px solid #222; }
             .grid { grid-template-columns: 1fr; }
-            .card { display: flex; align-items: center; padding-right: 10px; }
+            .card { display: flex; align-items: center; }
             .card img { width: 130px; }
-            .controls-panel { height: 100px; }
         }
 
-        /* ГОРИЗОНТАЛЬНА МОБІЛКА */
-        @media (max-height: 500px) and (max-width: 1023px) {
-            body, html { overflow-y: auto; height: auto; }
-            .app-wrap { height: auto; }
-            .video-section { position: relative; }
-        }
+        /* Стиль для Fullscreen */
+        :fullscreen .ratio { width: 100vw; height: 100vh; padding: 0; }
+        :fullscreen #exit-fs { display: block; }
     </style>
 </head>
 <body>
@@ -99,12 +96,14 @@
 <div class="app-wrap">
     <div class="video-section">
         <div class="ratio" id="player-box">
-            <iframe id="main-player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            <iframe id="main-player" src="" allow="autoplay; fullscreen"></iframe>
             <div class="video-shield" onclick="togglePlay()"></div>
             
+            <div id="exit-fs" onclick="toggleFS()">✕ ВИЙТИ</div>
+
             <div id="custom-overlay">
                 <div class="close-overlay" onclick="closeOverlay()">✕</div>
-                <div class="overlay-title">Наступний мультик:</div>
+                <div class="overlay-title">Вибирай мультик:</div>
                 <div id="rec-row" class="rec-row"></div>
             </div>
         </div>
@@ -174,13 +173,10 @@
     function play(index) {
         currentIndex = index;
         const id = videoData[index].id;
-        // controls=1 залишаємо всередині iframe, але наш щит не дає по ним тиснути. 
-        // Це гарантує стабільну роботу на ПК.
-        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&enablejsapi=1&iv_load_policy=3&modestbranding=1`;
+        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&enablejsapi=1&iv_load_policy=3&controls=0&disablekb=1`;
         isPlaying = true;
         document.getElementById('play-pause').innerText = '⏸';
         closeOverlay();
-        if (window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     function togglePlay() {
@@ -199,18 +195,29 @@
 
     function closeOverlay() {
         document.getElementById('custom-overlay').style.display = 'none';
-        // Якщо ми закриваємо хрестиком, треба відновити статус "грає"
-        const iframe = document.getElementById('main-player').contentWindow;
-        iframe.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        isPlaying = true;
-        document.getElementById('play-pause').innerText = '⏸';
+        if (!isPlaying) {
+            document.getElementById('main-player').contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            isPlaying = true;
+            document.getElementById('play-pause').innerText = '⏸';
+        }
     }
 
     function toggleFS() {
         const el = document.getElementById('player-box');
-        if (!document.fullscreenElement) el.requestFullscreen().catch(err => {});
-        else document.exitFullscreen();
+        if (!document.fullscreenElement) {
+            el.requestFullscreen().catch(err => {
+                alert("Помилка входу в повний екран");
+            });
+        } else {
+            document.exitFullscreen();
+        }
     }
+
+    // Відстеження виходу через ESC
+    document.addEventListener('fullscreenchange', () => {
+        const btn = document.getElementById('exit-fs');
+        btn.style.display = document.fullscreenElement ? 'block' : 'none';
+    });
 
     function playNext() { play((currentIndex + 1) % videoData.length); }
     function playPrev() { play((currentIndex - 1 + videoData.length) % videoData.length); }
