@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>KidsTV - No Error Edition</title>
+    <style>
+        :root { --bg: #0b0e14; --surface: #1a1d24; --accent: #00f2ff; --text: #e0e0e0; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--bg); color: var(--text); font-family: sans-serif; overflow: hidden; }
+        .app-container { display: grid; grid-template-columns: 1fr 320px; height: 100vh; padding: 10px; gap: 10px; box-sizing: border-box; }
+        .video-viewport { background: #000; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; border: 2px solid #333; }
+        iframe { flex-grow: 1; border: none; width: 100%; height: 100%; }
+        .sidebar { background: var(--surface); border-radius: 20px; overflow-y: auto; padding: 10px; border: 1px solid #333; }
+        .video-card { margin-bottom: 10px; cursor: pointer; }
+        .video-card img { width: 100%; border-radius: 10px; }
+        .controls { padding: 15px; text-align: center; background: var(--surface); }
+        .btn-next { background: #0072ff; border: none; color: white; padding: 10px 30px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="video-viewport">
+        <iframe id="main-player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <div class="controls">
+            <button class="btn-next" onclick="playRandom()">🚀 ІНШЕ ВІДЕО</button>
+        </div>
+    </div>
+    <div id="sidebar" class="sidebar"></div>
+</div>
+
+<script>
+    const API_KEY = 'AIzaSyCnUi9wAbsDwiq0FPYiVKLWIgyKHLDKFig';
+    const channelIds = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg'];
+    let allVideos = [];
+
+    async function init() {
+        for (const id of channelIds) {
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${id}&part=snippet&maxResults=20&type=video&videoEmbeddable=true`);
+            const data = await res.json();
+            if (data.items) {
+                data.items.forEach(v => allVideos.push({id: v.id.videoId, title: v.snippet.title, thumb: v.snippet.thumbnails.medium.url}));
+            }
+        }
+        allVideos.sort(() => Math.random() - 0.5);
+        render();
+        playRandom();
+    }
+
+    function render() {
+        document.getElementById('sidebar').innerHTML = allVideos.map(v => `
+            <div class="video-card" onclick="loadVideo('${v.id}')">
+                <img src="${v.thumb}">
+                <div style="font-size:12px">${v.title}</div>
+            </div>
+        `).join('');
+    }
+
+    function loadVideo(id) {
+        // Найпростіший спосіб вбудовування без JS API
+        document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
+    }
+
+    function playRandom() {
+        const v = allVideos[Math.floor(Math.random() * allVideos.length)];
+        if(v) loadVideo(v.id);
+    }
+
+    init();
+</script>
+</body>
+</html>
