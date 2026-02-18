@@ -3,107 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Super Pro</title>
+    <title>KidsTV Ultimate Armor</title>
     <style>
-        :root { --bg: #0a0a0a; --card: #1c1c1c; --accent: #00ff88; --btn-bg: #ff0055; --text: #fff; }
+        :root { 
+            --bg: #0f1015; 
+            --card: #1f2128; 
+            --accent: #00f2ff; 
+            --play-btn: #ff0055; 
+            --text: #ffffff; 
+            --radius: 20px;
+        }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html { 
             margin: 0; padding: 0; background: var(--bg); color: var(--text); 
-            font-family: 'Arial Rounded MT Bold', sans-serif; height: 100vh; overflow-x: hidden;
+            font-family: 'Segoe UI', Roboto, sans-serif; height: 100vh; width: 100vw; overflow: hidden;
         }
         
-        .app-wrap { display: flex; flex-direction: column; min-height: 100vh; }
+        .app-wrap { display: flex; flex-direction: column; height: 100vh; }
 
-        /* КОНТЕЙНЕР ПЛЕЄРА */
-        .video-container { width: 100%; background: #000; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
-        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; overflow: hidden; }
+        /* ПЛЕЄРНА ЗОНА */
+        .video-section { 
+            width: 100%; background: #000; position: relative; flex-shrink: 0; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10;
+        }
+        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* ЩИТ ТА КАСТОМНІ РЕКОМЕНДАЦІЇ */
-        .video-shield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: pointer; }
+        /* ЗАХИСНИЙ ОВЕРЛЕЙ */
+        .video-shield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; cursor: pointer; }
         
         #custom-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 15; display: none;
+            background: rgba(0,0,0,0.9); z-index: 100; display: none;
             flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
-        .overlay-title { font-size: 20px; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; font-weight: bold; }
-        .rec-row { display: flex; gap: 10px; width: 100%; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .close-overlay {
+            position: absolute; top: 15px; right: 15px; width: 40px; height: 40px;
+            background: #fff; color: #000; border-radius: 50%; font-size: 24px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;
+        }
+        .overlay-title { font-size: 22px; margin-bottom: 20px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
+        .rec-row { display: flex; gap: 15px; width: 100%; overflow-x: auto; padding: 10px; scroll-bar-width: none; }
         .rec-row::-webkit-scrollbar { display: none; }
-        .rec-card { flex: 0 0 140px; background: #333; border-radius: 10px; overflow: hidden; border: 2px solid var(--accent); }
-        .rec-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .rec-card { flex: 0 0 160px; border-radius: 15px; overflow: hidden; border: 3px solid #333; transition: 0.2s; }
+        .rec-card:active { border-color: var(--accent); transform: scale(0.95); }
+        .rec-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
 
-        /* НОВІ КНОПКИ КЕРУВАННЯ */
-        .custom-controls {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 15px; background: #111; border-bottom: 3px solid #222; z-index: 20;
+        /* ПУЛЬТ КЕРУВАННЯ */
+        .controls-panel {
+            display: flex; align-items: center; justify-content: space-around;
+            padding: 15px; background: var(--card); border-bottom: 1px solid #333;
         }
-        .ctrl-btn {
-            background: #333; border: none; color: white;
-            width: 60px; height: 60px; border-radius: 20px;
+        .c-btn {
+            background: #2a2d37; border: none; color: white;
+            width: 55px; height: 55px; border-radius: 18px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 24px; box-shadow: 0 4px #000; transition: 0.1s;
+            cursor: pointer; font-size: 20px; transition: 0.2s;
+            box-shadow: 0 4px 0 #15161a;
         }
-        .ctrl-btn:active { transform: translateY(3px); box-shadow: 0 1px #000; }
-        .btn-play { background: var(--btn-bg); width: 80px; box-shadow: 0 4px #80002b; }
+        .c-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #15161a; }
+        .c-btn.play { background: var(--play-btn); width: 75px; font-size: 26px; box-shadow: 0 4px 0 #990033; }
+        .c-btn.fs { background: #444; font-size: 18px; }
 
-        /* АКЦІЙНІ КНОПКИ */
-        .actions { padding: 10px; display: flex; gap: 10px; }
-        .btn-bottom { 
-            flex: 1; padding: 18px; border-radius: 15px; border: none; 
-            color: white; font-weight: 900; font-size: 16px; cursor: pointer;
-            box-shadow: 0 5px #000; text-transform: uppercase;
-        }
-        .refresh-btn { background: #444; }
-        .random-btn { background: #0077ff; }
+        /* СПИСОК ВІДЕО */
+        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; background: var(--bg); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .card { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid #2a2d37; }
+        .card:active { transform: scale(0.97); }
+        .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+        .card-info { padding: 10px; font-size: 13px; font-weight: 500; height: 50px; overflow: hidden; line-height: 1.3; }
 
-        /* СПИСОК */
-        .side-content { flex: 1; padding: 10px; background: var(--bg); overflow-y: visible; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #333; }
-        .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-        .card-title { padding: 8px; font-size: 12px; height: 40px; overflow: hidden; line-height: 1.2; }
-
+        /* ДИЗАЙН ДЛЯ ПК */
         @media (min-width: 1024px) {
             .app-wrap { flex-direction: row; }
-            .video-container { width: 70%; height: 100vh; position: sticky; top: 0; }
-            .ratio { flex: 1; padding-bottom: 0; }
-            .side-content { width: 30%; overflow-y: auto; border-left: 2px solid #222; }
+            .video-section { width: 75%; height: 100vh; border-bottom: none; }
+            .ratio { flex-grow: 1; padding-bottom: 0; height: calc(100vh - 100px); }
+            .scroll-area { width: 25%; border-left: 1px solid #222; }
             .grid { grid-template-columns: 1fr; }
-            .card { display: flex; align-items: center; gap: 10px; padding: 5px; }
-            .card img { width: 120px; border-radius: 8px; }
+            .card { display: flex; align-items: center; padding-right: 10px; }
+            .card img { width: 130px; }
+            .controls-panel { height: 100px; }
+        }
+
+        /* ГОРИЗОНТАЛЬНА МОБІЛКА */
+        @media (max-height: 500px) and (max-width: 1023px) {
+            body, html { overflow-y: auto; height: auto; }
+            .app-wrap { height: auto; }
+            .video-section { position: relative; }
         }
     </style>
 </head>
 <body>
 
 <div class="app-wrap">
-    <div class="video-container">
-        <div class="ratio">
-            <iframe id="main-player" src="" allow="autoplay; fullscreen"></iframe>
+    <div class="video-section">
+        <div class="ratio" id="player-box">
+            <iframe id="main-player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
             <div class="video-shield" onclick="togglePlay()"></div>
             
             <div id="custom-overlay">
-                <div class="overlay-title">Вибирай мультик:</div>
+                <div class="close-overlay" onclick="closeOverlay()">✕</div>
+                <div class="overlay-title">Наступний мультик:</div>
                 <div id="rec-row" class="rec-row"></div>
-                <button class="ctrl-btn btn-play" style="margin-top:20px" onclick="togglePlay()">▶</button>
             </div>
         </div>
         
-        <div class="custom-controls">
-            <button class="ctrl-btn" onclick="playPrev()">⏮</button>
-            <button class="ctrl-btn btn-play" id="play-pause" onclick="togglePlay()">⏸</button>
-            <button class="ctrl-btn" onclick="playNext()">⏭</button>
-        </div>
-
-        <div class="actions">
-            <button class="btn-bottom refresh-btn" onclick="loadFeed()">🔄 Оновити</button>
-            <button class="btn-bottom random-btn" onclick="playRandom()">🚀 Рандом</button>
+        <div class="controls-panel">
+            <button class="c-btn" onclick="playPrev()">⏮</button>
+            <button class="c-btn play" id="play-pause" onclick="togglePlay()">⏸</button>
+            <button class="c-btn" onclick="playNext()">⏭</button>
+            <button class="c-btn fs" onclick="toggleFS()">⛶</button>
+            <button class="c-btn" onclick="loadFeed()">🔄</button>
         </div>
     </div>
 
-    <div class="side-content">
+    <div class="scroll-area">
         <div id="grid" class="grid"></div>
     </div>
 </div>
@@ -119,7 +134,7 @@
     let currentIndex = 0;
 
     async function loadFeed() {
-        document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:20px">Завантаження...</p>';
+        document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:20px;color:var(--accent)">Завантаження...</p>';
         let allVideos = []; 
         for (const id of channels) {
             try {
@@ -138,57 +153,67 @@
         allVideos.sort(() => Math.random() - 0.5);
         videoData = allVideos.slice(0, 30);
         render();
-        if (videoData.length > 0) play(0);
+        if (videoData.length > 0 && !document.getElementById('main-player').src) play(0);
     }
 
     function render() {
-        const html = videoData.map((v, i) => `
+        document.getElementById('grid').innerHTML = videoData.map((v, i) => `
             <div class="card" onclick="play(${i})">
                 <img src="${v.thumb}">
-                <div class="card-title">${v.title}</div>
+                <div class="card-info">${v.title}</div>
             </div>
         `).join('');
-        document.getElementById('grid').innerHTML = html;
 
-        // Рендер рекомендацій для оверлею
-        const recHtml = videoData.slice(0, 10).map((v, i) => `
+        document.getElementById('rec-row').innerHTML = videoData.slice(0, 10).map((v, i) => `
             <div class="rec-card" onclick="play(${i})">
                 <img src="${v.thumb}">
             </div>
         `).join('');
-        document.getElementById('rec-row').innerHTML = recHtml;
     }
 
     function play(index) {
         currentIndex = index;
         const id = videoData[index].id;
-        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&controls=0&enablejsapi=1&disablekb=1`;
+        // controls=1 залишаємо всередині iframe, але наш щит не дає по ним тиснути. 
+        // Це гарантує стабільну роботу на ПК.
+        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&enablejsapi=1&iv_load_policy=3&modestbranding=1`;
         isPlaying = true;
         document.getElementById('play-pause').innerText = '⏸';
-        document.getElementById('custom-overlay').style.display = 'none';
+        closeOverlay();
         if (window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     function togglePlay() {
-        const overlay = document.getElementById('custom-overlay');
-        const btn = document.getElementById('play-pause');
         const iframe = document.getElementById('main-player').contentWindow;
-        
         if (isPlaying) {
             iframe.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-            overlay.style.display = 'flex';
-            btn.innerText = '▶';
+            document.getElementById('custom-overlay').style.display = 'flex';
+            document.getElementById('play-pause').innerText = '▶';
         } else {
             iframe.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-            overlay.style.display = 'none';
-            btn.innerText = '⏸';
+            closeOverlay();
+            document.getElementById('play-pause').innerText = '⏸';
         }
         isPlaying = !isPlaying;
     }
 
+    function closeOverlay() {
+        document.getElementById('custom-overlay').style.display = 'none';
+        // Якщо ми закриваємо хрестиком, треба відновити статус "грає"
+        const iframe = document.getElementById('main-player').contentWindow;
+        iframe.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        isPlaying = true;
+        document.getElementById('play-pause').innerText = '⏸';
+    }
+
+    function toggleFS() {
+        const el = document.getElementById('player-box');
+        if (!document.fullscreenElement) el.requestFullscreen().catch(err => {});
+        else document.exitFullscreen();
+    }
+
     function playNext() { play((currentIndex + 1) % videoData.length); }
     function playPrev() { play((currentIndex - 1 + videoData.length) % videoData.length); }
-    function playRandom() { play(Math.floor(Math.random() * videoData.length)); }
 
     loadFeed();
 </script>
