@@ -3,91 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Armor Pro Fixed</title>
+    <title>KidsTV Armor Ad-Fix</title>
     <style>
         :root { 
             --bg: #0f1015; --card: #1f2128; --accent: #00f2ff; 
-            --play-btn: #ff0055; --text: #ffffff; --radius: 20px;
+            --play-btn: #ff0055; --skip-ad: #ffcc00; --text: #ffffff;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html { 
             margin: 0; padding: 0; background: var(--bg); color: var(--text); 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            width: 100vw; min-height: 100vh;
-            /* Дозволяємо системний скрол завжди, щоб не було затиків */
-            overflow-x: hidden; overflow-y: auto;
+            font-family: 'Segoe UI', sans-serif; overflow-x: hidden;
         }
         
         .app-wrap { display: flex; flex-direction: column; width: 100%; }
 
-        /* ПЛЕЄРНА ЗОНА - тепер вона sticky для зручності */
         .video-section { 
-            width: 100%; background: #000; position: sticky; top: 0; 
-            z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            width: 100%; background: #000; position: sticky; top: 0; z-index: 100;
         }
         .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* ЗАХИСНИЙ ОВЕРЛЕЙ ТА ЕЛЕМЕНТИ */
-        .video-shield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; cursor: pointer; }
+        /* ЩИТ: pointer-events змінюється через JS */
+        .video-shield { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 5; cursor: pointer; pointer-events: auto;
+        }
         
+        /* КНОПКА ПРОПУСКУ РЕКЛАМИ */
+        .skip-ad-btn {
+            background: var(--skip-ad) !important; color: #000 !important;
+            font-weight: 900 !important; width: 100px !important;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
+        }
+
         #custom-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); z-index: 110; display: none;
-            flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+            background: rgba(0,0,0,0.9); z-index: 110; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
         }
-        .close-overlay {
-            position: absolute; top: 15px; right: 15px; width: 45px; height: 45px;
-            background: #fff; color: #000; border-radius: 50%; font-size: 28px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-        .rec-row { display: flex; gap: 15px; width: 100%; overflow-x: auto; padding: 10px; }
-        .rec-card { flex: 0 0 140px; border-radius: 12px; overflow: hidden; border: 2px solid #333; }
-        .rec-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+        .close-overlay { position: absolute; top: 15px; right: 15px; width: 45px; height: 45px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; }
 
-        #exit-fs {
-            position: absolute; top: 20px; left: 20px; z-index: 120;
-            background: rgba(255,255,255,0.2); color: white; border: 1px solid white;
-            padding: 8px 15px; border-radius: 20px; cursor: pointer; display: none;
-            backdrop-filter: blur(5px);
-        }
-
-        /* ПУЛЬТ КЕРУВАННЯ */
         .controls-panel {
             display: flex; align-items: center; justify-content: space-around;
             padding: 12px; background: var(--card); border-bottom: 2px solid #111;
         }
         .c-btn {
-            background: #2a2d37; border: none; color: white;
-            width: 50px; height: 50px; border-radius: 15px;
-            display: flex; align-items: center; justify-content: center;
+            background: #2a2d37; border: none; color: white; width: 50px; height: 50px; 
+            border-radius: 15px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; font-size: 20px; box-shadow: 0 3px 0 #000;
         }
         .c-btn.play { background: var(--play-btn); width: 70px; font-size: 26px; }
-        .c-btn.fs { color: var(--accent); }
 
-        /* СПИСОК ВІДЕО */
-        .scroll-area { padding: 15px; width: 100%; }
+        .scroll-area { padding: 15px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-        .card { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; }
+        .card { background: var(--card); border-radius: 15px; overflow: hidden; }
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .card-info { padding: 8px; font-size: 12px; height: 45px; overflow: hidden; }
+        .card-info { padding: 8px; font-size: 11px; height: 40px; overflow: hidden; }
 
-        /* АДАПТИВ ПК */
         @media (min-width: 1024px) {
             body, html { overflow: hidden; height: 100vh; }
             .app-wrap { flex-direction: row; height: 100vh; }
-            .video-section { width: 75%; height: 100vh; position: relative; }
+            .video-section { width: 75%; height: 100vh; }
             .ratio { height: calc(100vh - 85px); padding-bottom: 0; }
-            .scroll-area { width: 25%; height: 100vh; overflow-y: auto; border-left: 2px solid #111; }
+            .scroll-area { width: 25%; height: 100vh; overflow-y: auto; }
             .grid { grid-template-columns: 1fr; }
-            .card { display: flex; align-items: center; }
-            .card img { width: 120px; }
         }
 
-        /* Fullscreen хаки */
-        :fullscreen .ratio { width: 100vw; height: 100vh; padding: 0; }
+        #exit-fs {
+            position: absolute; top: 20px; left: 20px; z-index: 120;
+            background: #fff; color: #000; padding: 10px 20px; border-radius: 30px; 
+            display: none; cursor: pointer; font-weight: bold;
+        }
         :fullscreen #exit-fs { display: block; }
     </style>
 </head>
@@ -97,12 +87,13 @@
     <div class="video-section">
         <div class="ratio" id="player-box">
             <iframe id="main-player" src="" allow="autoplay; fullscreen"></iframe>
-            <div class="video-shield" onclick="togglePlay()"></div>
-            <div id="exit-fs" onclick="toggleFS()">✕ EXIT</div>
+            <div id="shield" class="video-shield" onclick="togglePlay()"></div>
+            
+            <div id="exit-fs" onclick="toggleFS()">✕ ВИЙТИ</div>
+            
             <div id="custom-overlay">
                 <div class="close-overlay" onclick="closeOverlay()">✕</div>
-                <div style="margin-bottom:15px; font-weight:bold; color:var(--accent)">ЩО ДАЛІ?</div>
-                <div id="rec-row" class="rec-row"></div>
+                <div id="rec-row" style="display:flex; gap:10px; padding:20px; overflow-x:auto; width:100%;"></div>
             </div>
         </div>
         
@@ -110,8 +101,8 @@
             <button class="c-btn" onclick="playPrev()">⏮</button>
             <button class="c-btn play" id="play-pause" onclick="togglePlay()">⏸</button>
             <button class="c-btn" onclick="playNext()">⏭</button>
-            <button class="c-btn fs" onclick="toggleFS()">⛶</button>
-            <button class="c-btn" onclick="location.reload()">🔄</button>
+            <button class="c-btn skip-ad-btn" id="ad-breaker" onclick="breakShield()">AD 🔓</button>
+            <button class="c-btn" onclick="toggleFS()">⛶</button>
         </div>
     </div>
 
@@ -121,60 +112,61 @@
 </div>
 
 <script>
-    const channels = [
-        'UCiDMw6_5dn59S8S-S_Vr23A', 'UC0Vf_i2h75sJM13bD9LixIg', 'UCcrAG9d_PifNP78aaJe5S2A', 
-        'UC_8PAD0Qmi6_gpe77S1Atgg', 'UCcartHVtvAUzfajflyeT_Gg', 'UCBw2WWpuadpPQKVKNZilDkg',
-        'UCyWkpcB25Hr2oN7uRlsNg5g', 'UCCIqROlnqhmQPjbdv3e8scQ', 'UCifNwVEEXhG26Z__VXrrcwQ'
-    ];
-    let videoData = [];
-    let isPlaying = true;
-    let currentIndex = 0;
+    const channels = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC0Vf_i2h75sJM13bD9LixIg', 'UCcrAG9d_PifNP78aaJe5S2A', 'UC_8PAD0Qmi6_gpe77S1Atgg', 'UCcartHVtvAUzfajflyeT_Gg'];
+    let videoData = [], currentIndex = 0, isPlaying = true;
 
     async function loadFeed() {
-        document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:20px;">Завантаження...</p>';
         let allVideos = []; 
         for (const id of channels) {
             try {
                 const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id=' + id)}`);
                 const data = await res.json();
-                if (data.items) {
-                    data.items.forEach(item => {
-                        const vId = item.link.split('v=')[1];
-                        if (vId && !item.title.toLowerCase().includes("shorts")) {
-                            allVideos.push({ id: vId, title: item.title, thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg` });
-                        }
-                    });
-                }
+                data.items.forEach(item => {
+                    const vId = item.link.split('v=')[1];
+                    if (vId) allVideos.push({ id: vId, title: item.title, thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg` });
+                });
             } catch (e) {}
         }
-        allVideos.sort(() => Math.random() - 0.5);
-        videoData = allVideos.slice(0, 30);
+        videoData = allVideos.sort(() => Math.random() - 0.5).slice(0, 30);
         render();
-        if (videoData.length > 0 && !document.getElementById('main-player').src) play(0);
+        if (videoData.length > 0) play(0);
     }
 
     function render() {
         document.getElementById('grid').innerHTML = videoData.map((v, i) => `
-            <div class="card" onclick="play(${i})">
-                <img src="${v.thumb}">
-                <div class="card-info">${v.title}</div>
-            </div>
+            <div class="card" onclick="play(${i})"><img src="${v.thumb}"><div class="card-info">${v.title}</div></div>
         `).join('');
-
-        document.getElementById('rec-row').innerHTML = videoData.slice(0, 10).map((v, i) => `
-            <div class="rec-card" onclick="play(${i})">
-                <img src="${v.thumb}">
-            </div>
+        document.getElementById('rec-row').innerHTML = videoData.slice(0, 8).map((v, i) => `
+            <div style="flex:0 0 120px" onclick="play(${i})"><img src="${v.thumb}" style="width:100%; border-radius:10px"></div>
         `).join('');
     }
 
     function play(index) {
         currentIndex = index;
-        const id = videoData[index].id;
-        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&enablejsapi=1&controls=0&disablekb=1`;
+        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${videoData[index].id}?autoplay=1&enablejsapi=1&rel=0&controls=1`;
         isPlaying = true;
         document.getElementById('play-pause').innerText = '⏸';
         closeOverlay();
+    }
+
+    // МАГІЯ ПРОПУСКУ РЕКЛАМИ
+    function breakShield() {
+        const shield = document.getElementById('shield');
+        const btn = document.getElementById('ad-breaker');
+        
+        // Вимикаємо щит (пропускаємо кліки крізь нього)
+        shield.style.pointerEvents = 'none';
+        btn.innerText = 'OK! ✅';
+        btn.style.animation = 'none';
+        btn.style.background = '#00ff88';
+
+        // Через 6 секунд повертаємо захист
+        setTimeout(() => {
+            shield.style.pointerEvents = 'auto';
+            btn.innerText = 'AD 🔓';
+            btn.style.animation = 'pulse 1.5s infinite';
+            btn.style.background = 'var(--skip-ad)';
+        }, 6000);
     }
 
     function togglePlay() {
@@ -191,25 +183,12 @@
         isPlaying = !isPlaying;
     }
 
-    function closeOverlay() {
-        document.getElementById('custom-overlay').style.display = 'none';
-        if (!isPlaying) {
-            document.getElementById('main-player').contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-            isPlaying = true;
-            document.getElementById('play-pause').innerText = '⏸';
-        }
-    }
-
-    function toggleFS() {
+    function closeOverlay() { document.getElementById('custom-overlay').style.display = 'none'; }
+    function toggleFS() { 
         const el = document.getElementById('player-box');
         if (!document.fullscreenElement) el.requestFullscreen();
         else document.exitFullscreen();
     }
-
-    document.addEventListener('fullscreenchange', () => {
-        document.getElementById('exit-fs').style.display = document.fullscreenElement ? 'block' : 'none';
-    });
-
     function playNext() { play((currentIndex + 1) % videoData.length); }
     function playPrev() { play((currentIndex - 1 + videoData.length) % videoData.length); }
 
