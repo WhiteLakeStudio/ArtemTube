@@ -2,72 +2,27 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KidsTV - Clean Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KidsTV - Mobile Fix</title>
     <style>
-        :root {
-            --bg: #0f0f0f;
-            --surface: #1e1e1e;
-            --accent: #ff0000; /* YouTube Red для звичності */
-            --text: #ffffff;
-            --text-dim: #aaaaaa;
-        }
+        :root { --bg: #0f0f0f; --surface: #1e1e1e; --accent: #ff0000; --text: #ffffff; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: sans-serif; height: 100%; overflow-x: hidden; }
+        
+        .app-container { display: flex; flex-direction: column; min-height: 100vh; }
 
-        body, html {
-            margin: 0; padding: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Roboto', Arial, sans-serif;
-            height: 100%;
-        }
-
-        /* Головна сітка */
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* Шапка з кнопкою рандому */
-        .header {
-            height: 60px;
-            background: var(--surface);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            justify-content: space-between;
-            border-bottom: 1px solid #333;
-            flex-shrink: 0;
-        }
-
-        .btn-next {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        /* Контентна частина */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        /* Зона плеєра */
+        /* Фіксована зона плеєра для мобільних */
         .video-section {
             width: 100%;
             background: #000;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .video-container {
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 */
+            width: 100%;
+            padding-bottom: 56.25%; /* Співвідношення 16:9 */
             height: 0;
         }
 
@@ -77,157 +32,107 @@
             border: none;
         }
 
-        /* Список відео */
-        .playlist-section {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 15px;
-            background: var(--bg);
+        .header {
+            padding: 10px 15px;
+            background: var(--surface);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
         }
+
+        .btn-next {
+            background: var(--accent);
+            color: white; border: none;
+            padding: 8px 16px; border-radius: 6px;
+            font-weight: bold; cursor: pointer;
+        }
+
+        .playlist-section { padding: 10px; flex-grow: 1; }
 
         .video-item {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-radius: 8px;
-            padding: 5px;
+            display: flex; gap: 10px; margin-bottom: 12px;
+            cursor: pointer; background: #1a1a1a;
+            border-radius: 8px; overflow: hidden;
         }
 
-        .video-item:hover { background: var(--surface); }
+        .video-item img { width: 120px; aspect-ratio: 16/9; object-fit: cover; }
+        .video-title { font-size: 13px; padding: 5px; line-height: 1.3; overflow: hidden; }
 
-        .video-item img {
-            width: 140px;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .video-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-        }
-
-        .video-title {
-            font-size: 14px;
-            font-weight: 500;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* Адаптація для ПК (широкий екран) */
+        /* Налаштування для ПК */
         @media (min-width: 1000px) {
-            .main-content {
-                flex-direction: row;
-            }
-            .video-section {
-                flex: 1;
-                padding: 20px;
-                display: flex;
-                align-items: flex-start;
-            }
-            .video-container {
-                width: 100%;
-                padding-bottom: 56.25%; /* Тримаємо 16:9 */
-            }
-            .playlist-section {
-                width: 400px;
-                flex-shrink: 0;
-                border-left: 1px solid #333;
-            }
+            .app-container { flex-direction: row; }
+            .video-section { position: relative; flex: 1; height: 100vh; display: flex; align-items: center; padding: 20px; box-sizing: border-box; }
+            .playlist-section { width: 380px; height: 100vh; overflow-y: auto; border-left: 1px solid #333; }
         }
-
-        /* Стиль для скролбару */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="header">
-        <div style="font-weight: bold; font-size: 1.2rem;">MyKidsTV</div>
-        <button class="btn-next" onclick="playRandom()">🚀 ІНШЕ ВІДЕО</button>
-    </div>
-
-    <div class="main-content">
-        <div class="video-section">
-            <div class="video-container">
-                <iframe id="player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
+    <div class="video-section">
+        <div class="video-container">
+            <iframe id="player" 
+                    src="" 
+                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media" 
+                    allowfullscreen>
+            </iframe>
         </div>
-
-        <div class="playlist-section" id="playlist">
-            </div>
+        <div class="header">
+            <span style="font-size: 14px; font-weight: bold;">KidsTV</span>
+            <button class="btn-next" onclick="playRandom()">🚀 ІНШЕ</button>
+        </div>
     </div>
+
+    <div class="playlist-section" id="playlist"></div>
 </div>
 
 <script>
     const API_KEY = 'AIzaSyCnUi9wAbsDwiq0FPYiVKLWIgyKHLDKFig';
-    const channelIds = [
-        'UCiDMw6_5dn59S8S-S_Vr23A', 
-        'UC_qs3c6ehD78pntpUo_T_Gg',
-        'UC4S7X8LNoq8m6_Yf_7S6yqA'
-    ];
+    const channelIds = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
     let videos = [];
 
     async function loadContent() {
-        videos = [];
         for (const id of channelIds) {
             try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${id}&part=snippet&maxResults=15&type=video&videoEmbeddable=true`);
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${id}&part=snippet&maxResults=20&type=video&videoEmbeddable=true`);
                 const data = await res.json();
                 if (data.items) {
-                    data.items.forEach(item => {
-                        videos.push({
-                            id: item.id.videoId,
-                            title: item.snippet.title,
-                            thumb: item.snippet.thumbnails.medium.url
-                        });
-                    });
+                    data.items.forEach(v => videos.push({id: v.id.videoId, title: v.snippet.title, thumb: v.snippet.thumbnails.medium.url}));
                 }
-            } catch (e) { console.log("Помилка завантаження", e); }
+            } catch (e) {}
         }
-        
-        // Рандом при завантаженні
         videos.sort(() => Math.random() - 0.5);
-        renderPlaylist();
+        render();
         if (videos.length > 0) playVideo(videos[0].id);
     }
 
-    function renderPlaylist() {
-        const container = document.getElementById('playlist');
-        container.innerHTML = videos.map(v => `
+    function render() {
+        document.getElementById('playlist').innerHTML = videos.map(v => `
             <div class="video-item" onclick="playVideo('${v.id}')">
-                <img src="${v.thumb}" alt="thumb">
-                <div class="video-info">
-                    <div class="video-title">${v.title}</div>
-                </div>
+                <img src="${v.thumb}">
+                <div class="video-title">${v.title}</div>
             </div>
         `).join('');
     }
 
     function playVideo(id) {
-        document.getElementById('player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
-        // На мобілках скролимо вгору до відео
+        // Параметр fs=1 дозволяє кнопку повного екрану
+        // Параметр rel=0 обмежує рекомендації лише вашим каналом (якщо можливо)
+        const player = document.getElementById('player');
+        player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&fs=1&playsinline=0`;
+        
         if (window.innerWidth < 1000) {
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
     }
 
     function playRandom() {
-        if (videos.length === 0) return;
         const rand = videos[Math.floor(Math.random() * videos.length)];
-        playVideo(rand.id);
+        if(rand) playVideo(rand.id);
     }
 
     loadContent();
 </script>
-
 </body>
 </html>
