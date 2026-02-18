@@ -3,63 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV - Ultimate Edition</title>
+    <title>KidsTV - Final Fix</title>
     <style>
         :root {
-            --bg: #0b0e14;
-            --surface: #1a1d24;
+            --bg: #05070a;
+            --surface: #12151c;
             --accent: #00f2ff;
-            --text: #e0e0e0;
+            --text: #ffffff;
         }
 
         body, html {
-            margin: 0; padding: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            height: 100%; overflow-x: hidden;
+            margin: 0; padding: 0; height: 100%;
+            background-color: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', sans-serif; overflow: hidden;
         }
 
-        /* Заставка для повороту екрану */
-        #rotate-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 9999;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        @media (max-width: 900px) and (orientation: portrait) {
-            #rotate-overlay { display: flex; }
-            .app-container { display: none; }
-        }
-
-        /* Контейнер додатка */
+        /* ОСНОВНА СІТКА */
         .app-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
         }
 
-        /* Плеєр */
+        /* ПЛЕЄР */
         .video-viewport {
-            flex-shrink: 0;
-            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             background: #000;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
         .video-wrapper {
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 */
-            height: 0;
+            flex-grow: 1;
+            width: 100%;
         }
 
         .video-wrapper iframe {
@@ -68,189 +45,166 @@
             border: none;
         }
 
-        /* Кнопка */
-        .controls {
-            padding: 12px;
+        /* ПАНЕЛЬ КЕРУВАННЯ */
+        .bottom-bar {
             background: var(--surface);
+            padding: 10px;
             display: flex;
+            gap: 10px;
             justify-content: center;
-            border-bottom: 1px solid #333;
+            border-top: 1px solid #333;
         }
 
-        .btn-next {
-            background: linear-gradient(45deg, #00c6ff, #0072ff);
+        .btn {
             border: none; color: white;
-            padding: 14px 40px;
-            border-radius: 50px;
-            font-size: 1.1rem;
+            padding: 12px 20px;
+            border-radius: 12px;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
-            transition: 0.3s;
+            font-size: 0.9rem;
         }
 
-        .btn-next:active { transform: scale(0.95); }
+        .btn-next { background: linear-gradient(45deg, #00c6ff, #0072ff); flex-grow: 1; max-width: 250px; }
+        .btn-list { background: #333; display: none; } /* Тільки для мобілок */
 
-        /* Список відео */
+        /* СПИСОК ВІДЕО (БОКОВИЙ) */
         .sidebar {
-            flex-grow: 1;
+            width: 350px;
+            background: var(--surface);
+            border-left: 1px solid #333;
             overflow-y: auto;
-            padding: 15px;
-        }
-
-        .video-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
+            display: block;
         }
 
         .video-card {
+            padding: 10px;
             cursor: pointer;
-            transition: 0.2s;
+            border-bottom: 1px solid #222;
+            display: flex;
+            gap: 10px;
         }
 
-        .video-card img {
-            width: 100%;
-            border-radius: 12px;
-            border: 2px solid transparent;
-        }
+        .video-card:hover { background: #1a1e26; }
+        .video-card img { width: 120px; border-radius: 8px; }
+        .video-card div { font-size: 0.8rem; overflow: hidden; }
 
-        .video-card:active img { border-color: var(--accent); }
+        /* --- АДАПТИВНІСТЬ --- */
 
-        .video-title {
-            font-size: 0.8rem;
-            margin-top: 6px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* Десктопна версія */
+        /* ДЛЯ ПК (Горизонтально) */
         @media (min-width: 900px) {
-            .app-container { flex-direction: row; padding: 20px; gap: 20px; }
-            .video-viewport { 
-                flex-grow: 1; 
-                height: fit-content; 
-                border-radius: 20px; 
-                position: relative;
-            }
-            .sidebar { 
-                width: 380px; 
-                background: var(--surface); 
-                border-radius: 20px;
-                border: 1px solid #333;
-            }
-            .video-list { grid-template-columns: 1fr; }
+            .app-container { flex-direction: row; }
+            .sidebar { display: block ! from; }
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        /* ДЛЯ МОБІЛОК */
+        @media (max-width: 899px) {
+            .sidebar {
+                position: fixed;
+                bottom: -100%; /* Сховано знизу */
+                left: 0; width: 100%; height: 70%;
+                z-index: 1000;
+                border-left: none;
+                border-top: 2px solid var(--accent);
+                transition: 0.3s ease-in-out;
+                border-radius: 20px 20px 0 0;
+            }
+            .sidebar.active { bottom: 0; }
+            .btn-list { display: block; } /* Показуємо кнопку списку */
+            
+            /* Заставка для повороту */
+            #rotate-hint {
+                display: none;
+                position: fixed; top:0; left:0; width:100%; height:100%;
+                background: #000; z-index: 9999;
+                flex-direction: column; justify-content: center; align-items: center;
+            }
+        }
+
+        @media (max-width: 899px) and (orientation: portrait) {
+            #rotate-hint { display: flex; }
+        }
+
+        /* Кнопка закриття шторки на мобілці */
+        .close-sidebar {
+            display: none;
+            width: 100%; padding: 10px; background: #222; 
+            text-align: center; font-weight: bold; color: var(--accent);
+        }
+        @media (max-width: 899px) { .close-sidebar { display: block; } }
+
     </style>
 </head>
 <body>
 
-<div id="rotate-overlay">
-    <div style="font-size: 60px; margin-bottom: 20px;">🔄</div>
-    <h2 style="margin: 0;">Будь ласка, поверни телефон</h2>
-    <p style="opacity: 0.7;">Мультики краще дивитися горизонтально!</p>
+<div id="rotate-hint">
+    <div style="font-size: 50px;">🔄</div>
+    <h3>Поверни телефон</h3>
 </div>
 
 <div class="app-container">
     <div class="video-viewport">
         <div class="video-wrapper">
-            <iframe id="main-player" 
-                    src="" 
-                    allow="autoplay; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-            </iframe>
+            <iframe id="main-player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>
-        <div class="controls">
-            <button class="btn-next" onclick="playRandom()">🚀 УВІМКНИ ІНШЕ</button>
+        <div class="bottom-bar">
+            <button class="btn btn-list" onclick="toggleSidebar()">📂 СПИСОК</button>
+            <button class="btn btn-next" onclick="playRandom()">🚀 ІНШЕ</button>
         </div>
     </div>
 
-    <div class="sidebar">
-        <div id="video-list" class="video-list"></div>
+    <div id="sidebar" class="sidebar">
+        <div class="close-sidebar" onclick="toggleSidebar()">🔽 ЗАКРИТИ СПИСОК</div>
+        <div id="video-list"></div>
     </div>
 </div>
 
 <script>
     const API_KEY = 'AIzaSyCnUi9wAbsDwiq0FPYiVKLWIgyKHLDKFig';
-    const channelIds = [
-        'UCiDMw6_5dn59S8S-S_Vr23A', 
-        'UC_qs3c6ehD78pntpUo_T_Gg',
-        'UC4S7X8LNoq8m6_Yf_7S6yqA'
-    ];
+    const channelIds = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
     let allVideos = [];
 
-    // Конвертація тривалості YouTube (PT1M30S) у секунди
-    function parseDuration(duration) {
-        const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-        return (parseInt(match[1] || 0) * 3600) + (parseInt(match[2] || 0) * 60) + parseInt(match[3] || 0);
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
     }
 
     async function init() {
-        allVideos = [];
         for (const id of channelIds) {
             try {
-                const searchRes = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${id}&part=id&maxResults=20&type=video&videoEmbeddable=true`);
-                const searchData = await searchRes.json();
-                
-                if (searchData.items) {
-                    const videoIds = searchData.items.map(i => i.id.videoId).join(',');
-                    const detailRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${videoIds}&part=contentDetails,snippet`);
-                    const detailData = await detailRes.json();
-                    
-                    detailData.items.forEach(v => {
-                        const sec = parseDuration(v.contentDetails.duration);
-                        if (sec > 60) { // Пропуск Shorts
-                            allVideos.push({
-                                id: v.id,
-                                title: v.snippet.title,
-                                thumb: v.snippet.thumbnails.medium.url
-                            });
-                        }
-                    });
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${id}&part=snippet&maxResults=15&type=video&videoEmbeddable=true`);
+                const data = await res.json();
+                if (data.items) {
+                    data.items.forEach(v => allVideos.push({
+                        id: v.id.videoId, 
+                        title: v.snippet.title, 
+                        thumb: v.snippet.thumbnails.medium.url
+                    }));
                 }
-            } catch (e) { console.error("API Error", e); }
+            } catch (e) {}
         }
-        
         allVideos.sort(() => Math.random() - 0.5);
         render();
-        if (allVideos.length > 0) loadVideo(allVideos[0].id, false);
+        if(allVideos.length > 0) loadVideo(allVideos[0].id);
     }
 
     function render() {
-        const container = document.getElementById('video-list');
-        container.innerHTML = allVideos.map(v => `
-            <div class="video-card" onclick="loadVideo('${v.id}', true)">
+        document.getElementById('video-list').innerHTML = allVideos.map(v => `
+            <div class="video-card" onclick="loadVideo('${v.id}'); toggleSidebar()">
                 <img src="${v.thumb}">
-                <div class="video-title">${v.title}</div>
+                <div>${v.title}</div>
             </div>
         `).join('');
     }
 
-    function loadVideo(id, autoScroll) {
-        const player = document.getElementById('main-player');
-        // rel=0 та modestbranding=1 прибирають сміття
-        player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&controls=1`;
-        
-        if (autoScroll && window.innerWidth < 900) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    function loadVideo(id) {
+        document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
     }
 
     function playRandom() {
-        if (allVideos.length === 0) return;
-        const rand = allVideos[Math.floor(Math.random() * allVideos.length)];
-        loadVideo(rand.id, true);
+        const v = allVideos[Math.floor(Math.random() * allVideos.length)];
+        if(v) loadVideo(v.id);
     }
 
     init();
 </script>
-
 </body>
 </html>
