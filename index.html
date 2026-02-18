@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Armor Pro Icons</title>
+    <title>KidsTV Armor Pro Icons Fixed</title>
     <link href="https://cdn.jsdelivr.net/npm/css.gg/icons/all.css" rel="stylesheet">
     <style>
         :root { 
@@ -12,10 +12,7 @@
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        body, html { 
-            margin: 0; padding: 0; background: var(--bg); color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; overflow-x: hidden;
-        }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
         
         .app-wrap { display: flex; flex-direction: column; width: 100%; }
 
@@ -23,7 +20,6 @@
         .video-section { width: 100%; background: #000; position: sticky; top: 0; z-index: 100; }
         .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-
         .video-shield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; cursor: pointer; }
         
         #custom-overlay {
@@ -32,26 +28,33 @@
             flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* ПУЛЬТ КЕРУВАННЯ */
+        /* ПУЛЬТ КЕРУВАННЯ - ФІКС ЦЕНТРУВАННЯ */
         .controls-panel {
             display: flex; align-items: center; justify-content: space-around;
             padding: 12px; background: var(--card); border-bottom: 2px solid #111;
         }
         .c-btn {
             background: #2a2d37; border: none; color: white; width: 50px; height: 50px; 
-            border-radius: 15px; display: flex; align-items: center; justify-content: center;
+            border-radius: 15px; display: inline-flex; align-items: center; justify-content: center;
             cursor: pointer; box-shadow: 0 3px 0 #000; transition: 0.1s;
+            position: relative; padding: 0; /* Прибираємо дефолтні відступи */
         }
         .c-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
-        .c-btn i { --ggs: 1.2; } /* Збільшуємо розмір іконок */
+        
+        /* Глобальний фікс для іконок css.gg всередині кнопок */
+        .c-btn i { 
+            --ggs: 1.3; 
+            display: block; 
+            flex-shrink: 0;
+        }
 
-        .c-btn.play { background: var(--play-btn); width: 70px; }
+        .c-btn.play { background: var(--play-btn); width: 75px; }
         .c-btn.skip-ad-btn { background: var(--skip-ad) !important; color: #000 !important; }
 
         /* СПИСОК */
         .scroll-area { padding: 15px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-        .card { background: var(--card); border-radius: 15px; overflow: hidden; }
+        .card { background: var(--card); border-radius: 15px; overflow: hidden; margin-bottom: 10px; }
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
         .card-info { padding: 8px; font-size: 11px; height: 40px; overflow: hidden; }
 
@@ -67,7 +70,7 @@
         #exit-fs {
             position: absolute; top: 20px; left: 20px; z-index: 120;
             background: #fff; color: #000; padding: 10px 15px; border-radius: 30px; 
-            display: none; cursor: pointer; font-weight: bold; align-items: center; gap: 5px;
+            display: none; cursor: pointer; font-weight: bold; align-items: center; gap: 8px;
         }
         :fullscreen #exit-fs { display: flex; }
     </style>
@@ -80,10 +83,10 @@
             <iframe id="main-player" src="" allow="autoplay; fullscreen"></iframe>
             <div id="shield" class="video-shield" onclick="togglePlay()"></div>
             
-            <div id="exit-fs" onclick="toggleFS()"><i class="gg-close-r"></i> ВИЙТИ</div>
+            <div id="exit-fs" onclick="toggleFS()"><i class="gg-close"></i> ВИЙТИ</div>
             
             <div id="custom-overlay">
-                <div style="position:absolute; top:15px; right:15px;" onclick="closeOverlay()">
+                <div style="position:absolute; top:20px; right:20px;" onclick="closeOverlay()">
                     <i class="gg-close-o" style="--ggs: 2; color:white;"></i>
                 </div>
                 <div id="rec-row" style="display:flex; gap:10px; padding:20px; overflow-x:auto; width:100%;"></div>
@@ -91,15 +94,18 @@
         </div>
         
         <div class="controls-panel">
-            <button class="c-btn" onclick="playPrev()"><i class="gg-play-backwards"></i></button>
-            <button class="c-btn play" id="play-pause" onclick="togglePlay()"><i class="gg-play-pause"></i></button>
-            <button class="c-btn" onclick="playNext()"><i class="gg-play-forward"></i></button>
+            <button class="c-btn" onclick="playPrev()"><i class="gg-chevron-left-r"></i></button>
             
-            <button class="c-btn skip-ad-btn" id="ad-breaker" onclick="breakShield()" title="Пропустити рекламу">
-                <i class="gg-unblock"></i>
+            <button class="c-btn play" id="play-pause" onclick="togglePlay()"><i class="gg-play-pause"></i></button>
+            
+            <button class="c-btn" onclick="playNext()"><i class="gg-chevron-right-r"></i></button>
+            
+            <button class="c-btn skip-ad-btn" id="ad-breaker" onclick="breakShield()">
+                <i class="gg-keyhole"></i>
             </button>
             
-            <button class="c-btn" onclick="toggleFS()"><i class="gg-maximize"></i></button>
+            <button class="c-btn" onclick="toggleFS()"><i class="gg-ratio"></i></button>
+            
             <button class="c-btn" onclick="location.reload()"><i class="gg-redo"></i></button>
         </div>
     </div>
@@ -135,7 +141,7 @@
             <div class="card" onclick="play(${i})"><img src="${v.thumb}"><div class="card-info">${v.title}</div></div>
         `).join('');
         document.getElementById('rec-row').innerHTML = videoData.slice(0, 8).map((v, i) => `
-            <div style="flex:0 0 120px" onclick="play(${i})"><img src="${v.thumb}" style="width:100%; border-radius:10px"></div>
+            <div style="flex:0 0 140px" onclick="play(${i})"><img src="${v.thumb}" style="width:100%; border-radius:10px; border:2px solid white;"></div>
         `).join('');
     }
 
@@ -170,11 +176,18 @@
     }
 
     function closeOverlay() { document.getElementById('custom-overlay').style.display = 'none'; }
+    
     function toggleFS() { 
         const el = document.getElementById('player-box');
-        if (!document.fullscreenElement) el.requestFullscreen();
-        else document.exitFullscreen();
+        if (!document.fullscreenElement) {
+            if (el.requestFullscreen) el.requestFullscreen();
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            else if (el.msRequestFullscreen) el.msRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
     }
+    
     function playNext() { play((currentIndex + 1) % videoData.length); }
     function playPrev() { play((currentIndex - 1 + videoData.length) % videoData.length); }
 
