@@ -2,53 +2,94 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Gold Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KidsTV Free Scroll</title>
     <style>
-        :root { --bg: #050505; --card: #121212; --accent: #ff004c; --text: #fff; }
-        body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; height: 100%; overflow: hidden; }
+        :root { --bg: #0a0a0a; --card: #161616; --accent: #ff004c; --text: #fff; }
+        body, html { 
+            margin: 0; padding: 0; background: var(--bg); 
+            color: var(--text); font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden; /* Забороняємо боковий скрол */
+        }
         
-        .app-shell { display: flex; flex-direction: column; height: 100vh; }
-
-        /* ЗОНА ПЛЕЄРА */
-        .video-fixed { width: 100%; background: #000; flex-shrink: 0; z-index: 100; border-bottom: 2px solid #222; }
-        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; }
-        .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-
-        /* ВЕЛИКА КНОПКА */
-        .actions { padding: 15px; background: #111; display: flex; justify-content: center; }
-        .btn-magic { 
-            background: linear-gradient(90deg, #ff004c, #ff6a00); 
-            border: none; color: white; padding: 16px; border-radius: 15px; 
-            font-size: 20px; font-weight: 800; width: 100%; max-width: 500px; cursor: pointer;
-            box-shadow: 0 4px 20px rgba(255, 0, 76, 0.4); text-transform: uppercase;
+        /* ПЛЕЄР: Тепер він просто частина потоку, не fixed */
+        .video-container {
+            width: 100%;
+            background: #000;
+        }
+        .ratio {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 */
+        }
+        .ratio iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: none;
         }
 
-        /* СПИСОК МУЛЬТИКІВ */
-        .content { flex-grow: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        
-        .v-card { background: var(--card); border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid #222; }
-        .v-card:active { transform: scale(0.95); }
-        .v-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .v-title { padding: 8px; font-size: 13px; font-weight: 600; height: 34px; overflow: hidden; color: #ccc; }
+        /* Кнопка */
+        .actions {
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            background: var(--bg);
+        }
+        .btn-magic { 
+            background: linear-gradient(90deg, #ff004c, #ff6a00); 
+            border: none; color: white; padding: 14px; border-radius: 12px; 
+            font-size: 18px; font-weight: bold; width: 100%; max-width: 500px; 
+            cursor: pointer; box-shadow: 0 4px 15px rgba(255, 0, 76, 0.3);
+        }
 
-        /* ПК ВЕРСІЯ (Fix для великих моніторів) */
+        /* СІТКА ВІДЕО */
+        .playlist {
+            padding: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid #222;
+        }
+        .card img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+        }
+        .card-title {
+            padding: 8px;
+            font-size: 12px;
+            height: 32px;
+            overflow: hidden;
+            color: #ccc;
+            line-height: 1.3;
+        }
+
+        /* ПК ВЕРСІЯ: Тут краще залишити розділення, щоб не скролити кілометри */
         @media (min-width: 1024px) {
-            .app-shell { flex-direction: row; }
-            .video-fixed { width: 70%; height: 100vh; display: flex; flex-direction: column; justify-content: center; border-right: 2px solid #222; border-bottom: none; }
-            .content { width: 30%; background: #080808; }
-            .grid { grid-template-columns: 1fr; }
-            .v-card { display: flex; gap: 15px; padding: 10px; background: transparent; border: none; border-bottom: 1px solid #222; border-radius: 0; }
-            .v-card img { width: 160px; border-radius: 8px; }
-            .v-title { font-size: 16px; height: auto; color: #fff; padding: 0; }
+            .app-wrap { display: flex; height: 100vh; }
+            .video-container { width: 70%; height: 100vh; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #222; }
+            .side-content { width: 30%; overflow-y: auto; background: #080808; }
+            .grid { grid-template-columns: 1fr; padding: 15px; }
+            .card { display: flex; gap: 10px; border: none; background: transparent; padding-bottom: 10px; border-bottom: 1px solid #222; border-radius: 0; }
+            .card img { width: 140px; border-radius: 6px; }
+            .card-title { font-size: 14px; height: auto; padding: 0; color: #fff; }
         }
     </style>
 </head>
 <body>
 
-<div class="app-shell">
-    <div class="video-fixed">
+<div class="app-wrap">
+    <div class="video-container">
         <div class="ratio">
             <iframe id="main-player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
         </div>
@@ -57,74 +98,71 @@
         </div>
     </div>
 
-    <div class="content">
-        <div id="video-grid" class="grid">
-            <p style="padding: 20px;">Шукаємо мультики...</p>
+    <div class="side-content">
+        <div class="playlist">
+            <div id="grid" class="grid">
+                <p>Шукаємо мультики...</p>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Список ID каналів (мультики про поїзди та інше)
-    const channelIds = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
-    let videos = [];
+    const channels = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
+    let videoData = [];
 
-    // Використовуємо сервіс-проксі для отримання відео без API Key
-    async function loadVideos() {
-        for (const id of channelIds) {
+    async function loadFeed() {
+        for (const id of channels) {
             try {
-                // RSS фід ютуба дає останні 15 відео безкоштовно
-                const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`;
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
-                const data = await response.json();
+                const rss = `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`;
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`);
+                const data = await res.json();
                 
                 if (data.items) {
                     data.items.forEach(item => {
                         const vId = item.link.split('v=')[1];
-                        videos.push({
+                        videoData.push({
                             id: vId,
                             title: item.title,
                             thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg`
                         });
                     });
                 }
-            } catch (e) { console.error("Error loading feed"); }
+            } catch (e) { console.error("RSS error"); }
         }
 
-        if (videos.length > 0) {
-            videos.sort(() => Math.random() - 0.5);
-            renderGrid();
-            play(videos[0].id);
-        } else {
-            document.getElementById('video-grid').innerHTML = "<p>Не вдалося завантажити відео. Перевір інтернет.</p>";
+        if (videoData.length > 0) {
+            videoData.sort(() => Math.random() - 0.5);
+            render();
+            play(videoData[0].id, false); // Перше відео вантажимо без автоскролу
         }
     }
 
-    function renderGrid() {
-        document.getElementById('video-grid').innerHTML = videos.map(v => `
-            <div class="v-card" onclick="play('${v.id}')">
+    function render() {
+        document.getElementById('grid').innerHTML = videoData.map(v => `
+            <div class="card" onclick="play('${v.id}', true)">
                 <img src="${v.thumb}">
-                <div class="v-title">${v.title}</div>
+                <div class="card-title">${v.title}</div>
             </div>
         `).join('');
     }
 
-    function play(id) {
-        // Додаємо затримку для стабільності на мобільних
-        const player = document.getElementById('main-player');
-        player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&fs=1`;
+    function play(id, shouldScroll) {
+        document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
         
-        if (window.innerWidth < 1024) {
+        // Скролимо до плеєра ТІЛЬКИ якщо людина клікнула на відео в списку
+        if (shouldScroll && window.innerWidth < 1024) {
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
     }
 
     function playRandom() {
-        const rand = videos[Math.floor(Math.random() * videos.length)];
-        if (rand) play(rand.id);
+        const rand = videoData[Math.floor(Math.random() * videoData.length)];
+        if (rand) play(rand.id, true);
     }
 
-    loadVideos();
+    loadFeed();
 </script>
+
 </body>
 </html>
