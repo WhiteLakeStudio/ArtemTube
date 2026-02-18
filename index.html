@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Armor Ad-Fix</title>
+    <title>KidsTV Armor Pro Icons</title>
+    <link href="https://cdn.jsdelivr.net/npm/css.gg/icons/all.css" rel="stylesheet">
     <style>
         :root { 
             --bg: #0f1015; --card: #1f2128; --accent: #00f2ff; 
@@ -18,35 +19,20 @@
         
         .app-wrap { display: flex; flex-direction: column; width: 100%; }
 
-        .video-section { 
-            width: 100%; background: #000; position: sticky; top: 0; z-index: 100;
-        }
+        /* ПЛЕЄР */
+        .video-section { width: 100%; background: #000; position: sticky; top: 0; z-index: 100; }
         .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* ЩИТ: pointer-events змінюється через JS */
-        .video-shield { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 5; cursor: pointer; pointer-events: auto;
-        }
+        .video-shield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; cursor: pointer; }
         
-        /* КНОПКА ПРОПУСКУ РЕКЛАМИ */
-        .skip-ad-btn {
-            background: var(--skip-ad) !important; color: #000 !important;
-            font-weight: 900 !important; width: 100px !important;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
-        }
-
         #custom-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 110; display: none;
             flex-direction: column; align-items: center; justify-content: center;
         }
-        .close-overlay { position: absolute; top: 15px; right: 15px; width: 45px; height: 45px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; }
 
+        /* ПУЛЬТ КЕРУВАННЯ */
         .controls-panel {
             display: flex; align-items: center; justify-content: space-around;
             padding: 12px; background: var(--card); border-bottom: 2px solid #111;
@@ -54,10 +40,15 @@
         .c-btn {
             background: #2a2d37; border: none; color: white; width: 50px; height: 50px; 
             border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 20px; box-shadow: 0 3px 0 #000;
+            cursor: pointer; box-shadow: 0 3px 0 #000; transition: 0.1s;
         }
-        .c-btn.play { background: var(--play-btn); width: 70px; font-size: 26px; }
+        .c-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
+        .c-btn i { --ggs: 1.2; } /* Збільшуємо розмір іконок */
 
+        .c-btn.play { background: var(--play-btn); width: 70px; }
+        .c-btn.skip-ad-btn { background: var(--skip-ad) !important; color: #000 !important; }
+
+        /* СПИСОК */
         .scroll-area { padding: 15px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
         .card { background: var(--card); border-radius: 15px; overflow: hidden; }
@@ -75,10 +66,10 @@
 
         #exit-fs {
             position: absolute; top: 20px; left: 20px; z-index: 120;
-            background: #fff; color: #000; padding: 10px 20px; border-radius: 30px; 
-            display: none; cursor: pointer; font-weight: bold;
+            background: #fff; color: #000; padding: 10px 15px; border-radius: 30px; 
+            display: none; cursor: pointer; font-weight: bold; align-items: center; gap: 5px;
         }
-        :fullscreen #exit-fs { display: block; }
+        :fullscreen #exit-fs { display: flex; }
     </style>
 </head>
 <body>
@@ -89,20 +80,27 @@
             <iframe id="main-player" src="" allow="autoplay; fullscreen"></iframe>
             <div id="shield" class="video-shield" onclick="togglePlay()"></div>
             
-            <div id="exit-fs" onclick="toggleFS()">✕ ВИЙТИ</div>
+            <div id="exit-fs" onclick="toggleFS()"><i class="gg-close-r"></i> ВИЙТИ</div>
             
             <div id="custom-overlay">
-                <div class="close-overlay" onclick="closeOverlay()">✕</div>
+                <div style="position:absolute; top:15px; right:15px;" onclick="closeOverlay()">
+                    <i class="gg-close-o" style="--ggs: 2; color:white;"></i>
+                </div>
                 <div id="rec-row" style="display:flex; gap:10px; padding:20px; overflow-x:auto; width:100%;"></div>
             </div>
         </div>
         
         <div class="controls-panel">
-            <button class="c-btn" onclick="playPrev()">⏮</button>
-            <button class="c-btn play" id="play-pause" onclick="togglePlay()">⏸</button>
-            <button class="c-btn" onclick="playNext()">⏭</button>
-            <button class="c-btn skip-ad-btn" id="ad-breaker" onclick="breakShield()">AD 🔓</button>
-            <button class="c-btn" onclick="toggleFS()">⛶</button>
+            <button class="c-btn" onclick="playPrev()"><i class="gg-play-backwards"></i></button>
+            <button class="c-btn play" id="play-pause" onclick="togglePlay()"><i class="gg-play-pause"></i></button>
+            <button class="c-btn" onclick="playNext()"><i class="gg-play-forward"></i></button>
+            
+            <button class="c-btn skip-ad-btn" id="ad-breaker" onclick="breakShield()" title="Пропустити рекламу">
+                <i class="gg-unblock"></i>
+            </button>
+            
+            <button class="c-btn" onclick="toggleFS()"><i class="gg-maximize"></i></button>
+            <button class="c-btn" onclick="location.reload()"><i class="gg-redo"></i></button>
         </div>
     </div>
 
@@ -145,26 +143,16 @@
         currentIndex = index;
         document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${videoData[index].id}?autoplay=1&enablejsapi=1&rel=0&controls=1`;
         isPlaying = true;
-        document.getElementById('play-pause').innerText = '⏸';
         closeOverlay();
     }
 
-    // МАГІЯ ПРОПУСКУ РЕКЛАМИ
     function breakShield() {
         const shield = document.getElementById('shield');
         const btn = document.getElementById('ad-breaker');
-        
-        // Вимикаємо щит (пропускаємо кліки крізь нього)
         shield.style.pointerEvents = 'none';
-        btn.innerText = 'OK! ✅';
-        btn.style.animation = 'none';
         btn.style.background = '#00ff88';
-
-        // Через 6 секунд повертаємо захист
         setTimeout(() => {
             shield.style.pointerEvents = 'auto';
-            btn.innerText = 'AD 🔓';
-            btn.style.animation = 'pulse 1.5s infinite';
             btn.style.background = 'var(--skip-ad)';
         }, 6000);
     }
@@ -174,11 +162,9 @@
         if (isPlaying) {
             iframe.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
             document.getElementById('custom-overlay').style.display = 'flex';
-            document.getElementById('play-pause').innerText = '▶';
         } else {
             iframe.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
             closeOverlay();
-            document.getElementById('play-pause').innerText = '⏸';
         }
         isPlaying = !isPlaying;
     }
