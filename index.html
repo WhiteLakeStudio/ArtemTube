@@ -3,123 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Pro Max</title>
+    <title>KidsTV Gold Edition</title>
     <style>
         :root { --bg: #050505; --card: #121212; --accent: #ff004c; --text: #fff; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; height: 100%; overflow: hidden; }
         
-        /* Глобальна структура */
         .app-shell { display: flex; flex-direction: column; height: 100vh; }
 
-        /* ПЛЕЄР */
-        .video-fixed-top { width: 100%; background: #000; flex-shrink: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        /* ЗОНА ПЛЕЄРА */
+        .video-fixed { width: 100%; background: #000; flex-shrink: 0; z-index: 100; border-bottom: 2px solid #222; }
         .ratio { position: relative; width: 100%; padding-bottom: 56.25%; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* КЕРУВАННЯ */
-        .header-actions { padding: 12px; background: #111; display: flex; gap: 10px; border-bottom: 1px solid #222; }
-        .btn-next { 
+        /* ВЕЛИКА КНОПКА */
+        .actions { padding: 15px; background: #111; display: flex; justify-content: center; }
+        .btn-magic { 
             background: linear-gradient(90deg, #ff004c, #ff6a00); 
-            border: none; color: white; padding: 14px; border-radius: 12px; 
-            font-size: 16px; font-weight: bold; flex-grow: 1; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 0, 76, 0.3);
+            border: none; color: white; padding: 16px; border-radius: 15px; 
+            font-size: 20px; font-weight: 800; width: 100%; max-width: 500px; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(255, 0, 76, 0.4); text-transform: uppercase;
         }
 
-        /* СПИСОК ВІДЕО */
-        .main-scroll { flex-grow: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
-        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        /* СПИСОК МУЛЬТИКІВ */
+        .content { flex-grow: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
         
-        .card { background: var(--card); border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid #222; }
-        .card:active { transform: scale(0.95); }
-        .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .card-info { padding: 8px; font-size: 12px; line-height: 1.3; height: 32px; overflow: hidden; color: #bbb; }
+        .v-card { background: var(--card); border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid #222; }
+        .v-card:active { transform: scale(0.95); }
+        .v-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+        .v-title { padding: 8px; font-size: 13px; font-weight: 600; height: 34px; overflow: hidden; color: #ccc; }
 
-        /* ВЕЛИКИЙ ЕКРАН (ПК) */
+        /* ПК ВЕРСІЯ (Fix для великих моніторів) */
         @media (min-width: 1024px) {
             .app-shell { flex-direction: row; }
-            .video-fixed-top { width: 75%; height: 100vh; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #222; }
-            .main-scroll { width: 25%; background: #080808; }
-            .video-grid { grid-template-columns: 1fr; }
-            .header-actions { border-bottom: none; border-top: 1px solid #222; }
-            .card { display: flex; gap: 10px; padding: 5px; background: transparent; border: none; }
-            .card img { width: 120px; border-radius: 8px; }
-            .card-info { font-size: 14px; height: auto; color: #fff; }
+            .video-fixed { width: 70%; height: 100vh; display: flex; flex-direction: column; justify-content: center; border-right: 2px solid #222; border-bottom: none; }
+            .content { width: 30%; background: #080808; }
+            .grid { grid-template-columns: 1fr; }
+            .v-card { display: flex; gap: 15px; padding: 10px; background: transparent; border: none; border-bottom: 1px solid #222; border-radius: 0; }
+            .v-card img { width: 160px; border-radius: 8px; }
+            .v-title { font-size: 16px; height: auto; color: #fff; padding: 0; }
         }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
-    <div class="video-fixed-top">
+    <div class="video-fixed">
         <div class="ratio">
-            <iframe id="player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            <iframe id="main-player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
         </div>
-        <div class="header-actions">
-            <button class="btn-next" onclick="playRandom()">🚀 УВІМКНИ ІНШЕ</button>
+        <div class="actions">
+            <button class="btn-magic" onclick="playRandom()">🚀 ІНШЕ ВІДЕО</button>
         </div>
     </div>
 
-    <div class="main-scroll">
-        <div id="grid" class="video-grid">
-            </div>
+    <div class="content">
+        <div id="video-grid" class="grid">
+            <p style="padding: 20px;">Шукаємо мультики...</p>
+        </div>
     </div>
 </div>
 
 <script>
-    const API_KEY = 'AIzaSyCnUi9wAbsDwiq0FPYiVKLWIgyKHLDKFig';
-    const channels = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
-    let allVideos = [];
+    // Список ID каналів (мультики про поїзди та інше)
+    const channelIds = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
+    let videos = [];
 
-    async function loadTube() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = "<p>Завантаження каналів...</p>";
-
-        for (const cid of channels) {
+    // Використовуємо сервіс-проксі для отримання відео без API Key
+    async function loadVideos() {
+        for (const id of channelIds) {
             try {
-                const r = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${cid}&part=snippet&maxResults=20&type=video&videoEmbeddable=true`);
-                const d = await r.json();
-                if (d.items) {
-                    d.items.forEach(v => allVideos.push({
-                        id: v.id.videoId,
-                        title: v.snippet.title,
-                        thumb: v.snippet.thumbnails.medium.url
-                    }));
+                // RSS фід ютуба дає останні 15 відео безкоштовно
+                const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`;
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const data = await response.json();
+                
+                if (data.items) {
+                    data.items.forEach(item => {
+                        const vId = item.link.split('v=')[1];
+                        videos.push({
+                            id: vId,
+                            title: item.title,
+                            thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg`
+                        });
+                    });
                 }
-            } catch (err) { console.error("Skip channel", cid); }
+            } catch (e) { console.error("Error loading feed"); }
         }
 
-        if (allVideos.length > 0) {
-            allVideos.sort(() => Math.random() - 0.5);
-            render();
-            play(allVideos[0].id);
+        if (videos.length > 0) {
+            videos.sort(() => Math.random() - 0.5);
+            renderGrid();
+            play(videos[0].id);
         } else {
-            grid.innerHTML = "<p style='color:red'>Помилка API. Перевір ключ або ліміти.</p>";
+            document.getElementById('video-grid').innerHTML = "<p>Не вдалося завантажити відео. Перевір інтернет.</p>";
         }
     }
 
-    function render() {
-        document.getElementById('grid').innerHTML = allVideos.map(v => `
-            <div class="card" onclick="play('${v.id}')">
+    function renderGrid() {
+        document.getElementById('video-grid').innerHTML = videos.map(v => `
+            <div class="v-card" onclick="play('${v.id}')">
                 <img src="${v.thumb}">
-                <div class="card-info">${v.title}</div>
+                <div class="v-title">${v.title}</div>
             </div>
         `).join('');
     }
 
     function play(id) {
-        document.getElementById('player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&fs=1`;
-        if (window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
+        // Додаємо затримку для стабільності на мобільних
+        const player = document.getElementById('main-player');
+        player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&fs=1`;
+        
+        if (window.innerWidth < 1024) {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
     }
 
     function playRandom() {
-        const v = allVideos[Math.floor(Math.random() * allVideos.length)];
-        if (v) play(v.id);
+        const rand = videos[Math.floor(Math.random() * videos.length)];
+        if (rand) play(rand.id);
     }
 
-    loadTube();
+    loadVideos();
 </script>
 </body>
 </html>
