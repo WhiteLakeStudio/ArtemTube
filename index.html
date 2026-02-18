@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Armor Pro</title>
+    <title>KidsTV Armor Pro Fixed</title>
     <style>
         :root { 
             --bg: #0f1015; --card: #1f2128; --accent: #00f2ff; 
@@ -14,86 +14,79 @@
         body, html { 
             margin: 0; padding: 0; background: var(--bg); color: var(--text); 
             font-family: 'Segoe UI', Roboto, sans-serif; 
-            height: 100vh; width: 100vw; overflow: hidden;
+            width: 100vw; min-height: 100vh;
+            /* Дозволяємо системний скрол завжди, щоб не було затиків */
+            overflow-x: hidden; overflow-y: auto;
         }
         
-        .app-wrap { display: flex; flex-direction: column; height: 100vh; }
+        .app-wrap { display: flex; flex-direction: column; width: 100%; }
 
-        /* ПЛЕЄРНА ЗОНА */
+        /* ПЛЕЄРНА ЗОНА - тепер вона sticky для зручності */
         .video-section { 
-            width: 100%; background: #000; position: relative; flex-shrink: 0; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10;
+            width: 100%; background: #000; position: sticky; top: 0; 
+            z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.8);
         }
         .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* ЗАХИСНИЙ ОВЕРЛЕЙ */
+        /* ЗАХИСНИЙ ОВЕРЛЕЙ ТА ЕЛЕМЕНТИ */
         .video-shield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; cursor: pointer; }
         
         #custom-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); z-index: 100; display: none;
+            background: rgba(0,0,0,0.92); z-index: 110; display: none;
             flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
         .close-overlay {
             position: absolute; top: 15px; right: 15px; width: 45px; height: 45px;
             background: #fff; color: #000; border-radius: 50%; font-size: 28px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-        .overlay-title { font-size: 22px; margin-bottom: 20px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
         .rec-row { display: flex; gap: 15px; width: 100%; overflow-x: auto; padding: 10px; }
-        .rec-row::-webkit-scrollbar { display: none; }
-        .rec-card { flex: 0 0 160px; border-radius: 15px; overflow: hidden; border: 3px solid #333; }
+        .rec-card { flex: 0 0 140px; border-radius: 12px; overflow: hidden; border: 2px solid #333; }
         .rec-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
 
         #exit-fs {
-            position: absolute; top: 20px; left: 20px; z-index: 101;
+            position: absolute; top: 20px; left: 20px; z-index: 120;
             background: rgba(255,255,255,0.2); color: white; border: 1px solid white;
-            padding: 10px 20px; border-radius: 30px; cursor: pointer; display: none;
-            backdrop-filter: blur(5px); font-weight: bold;
+            padding: 8px 15px; border-radius: 20px; cursor: pointer; display: none;
+            backdrop-filter: blur(5px);
         }
 
         /* ПУЛЬТ КЕРУВАННЯ */
         .controls-panel {
             display: flex; align-items: center; justify-content: space-around;
-            padding: 15px; background: var(--card); border-bottom: 1px solid #333;
+            padding: 12px; background: var(--card); border-bottom: 2px solid #111;
         }
         .c-btn {
             background: #2a2d37; border: none; color: white;
-            width: 55px; height: 55px; border-radius: 18px;
+            width: 50px; height: 50px; border-radius: 15px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 20px; box-shadow: 0 4px 0 #15161a;
+            cursor: pointer; font-size: 20px; box-shadow: 0 3px 0 #000;
         }
-        .c-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #15161a; }
-        .c-btn.play { background: var(--play-btn); width: 80px; font-size: 28px; box-shadow: 0 4px 0 #990033; }
-        .c-btn.fs { background: #444; font-size: 20px; color: var(--accent); }
+        .c-btn.play { background: var(--play-btn); width: 70px; font-size: 26px; }
+        .c-btn.fs { color: var(--accent); }
 
         /* СПИСОК ВІДЕО */
-        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .card { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; border: 1px solid #2a2d37; }
+        .scroll-area { padding: 15px; width: 100%; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .card { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .card-info { padding: 10px; font-size: 13px; height: 50px; overflow: hidden; }
+        .card-info { padding: 8px; font-size: 12px; height: 45px; overflow: hidden; }
 
-        /* --- ВАЖЛИВИЙ ФІКС ДЛЯ ГОРИЗОНТАЛЬНОГО РЕЖИМУ --- */
-        @media (max-height: 600px) and (orientation: landscape) {
-            body, html { overflow-y: auto; height: auto; }
-            .app-wrap { height: auto; overflow: visible; }
-            .scroll-area { overflow-y: visible; }
-            /* Плеєр залишається зверху, але дозволяє скролити контент під ним */
-            .video-section { position: relative; }
-        }
-
+        /* АДАПТИВ ПК */
         @media (min-width: 1024px) {
-            .app-wrap { flex-direction: row; height: 100vh; overflow: hidden; }
-            .video-section { width: 75%; height: 100vh; }
-            .ratio { height: calc(100vh - 100px); padding-bottom: 0; }
-            .scroll-area { width: 25%; border-left: 1px solid #222; height: 100vh; overflow-y: auto; }
+            body, html { overflow: hidden; height: 100vh; }
+            .app-wrap { flex-direction: row; height: 100vh; }
+            .video-section { width: 75%; height: 100vh; position: relative; }
+            .ratio { height: calc(100vh - 85px); padding-bottom: 0; }
+            .scroll-area { width: 25%; height: 100vh; overflow-y: auto; border-left: 2px solid #111; }
             .grid { grid-template-columns: 1fr; }
             .card { display: flex; align-items: center; }
-            .card img { width: 130px; }
+            .card img { width: 120px; }
         }
 
+        /* Fullscreen хаки */
         :fullscreen .ratio { width: 100vw; height: 100vh; padding: 0; }
         :fullscreen #exit-fs { display: block; }
     </style>
@@ -105,10 +98,10 @@
         <div class="ratio" id="player-box">
             <iframe id="main-player" src="" allow="autoplay; fullscreen"></iframe>
             <div class="video-shield" onclick="togglePlay()"></div>
-            <div id="exit-fs" onclick="toggleFS()">✕ ВИЙТИ</div>
+            <div id="exit-fs" onclick="toggleFS()">✕ EXIT</div>
             <div id="custom-overlay">
                 <div class="close-overlay" onclick="closeOverlay()">✕</div>
-                <div class="overlay-title">Вибирай мультик:</div>
+                <div style="margin-bottom:15px; font-weight:bold; color:var(--accent)">ЩО ДАЛІ?</div>
                 <div id="rec-row" class="rec-row"></div>
             </div>
         </div>
@@ -118,7 +111,7 @@
             <button class="c-btn play" id="play-pause" onclick="togglePlay()">⏸</button>
             <button class="c-btn" onclick="playNext()">⏭</button>
             <button class="c-btn fs" onclick="toggleFS()">⛶</button>
-            <button class="c-btn" onclick="loadFeed()">🔄</button>
+            <button class="c-btn" onclick="location.reload()">🔄</button>
         </div>
     </div>
 
@@ -138,8 +131,7 @@
     let currentIndex = 0;
 
     async function loadFeed() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '<p style="text-align:center;padding:20px;color:var(--accent)">Завантаження...</p>';
+        document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:20px;">Завантаження...</p>';
         let allVideos = []; 
         for (const id of channels) {
             try {
@@ -179,7 +171,7 @@
     function play(index) {
         currentIndex = index;
         const id = videoData[index].id;
-        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&enablejsapi=1&iv_load_policy=3&controls=0&disablekb=1`;
+        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&enablejsapi=1&controls=0&disablekb=1`;
         isPlaying = true;
         document.getElementById('play-pause').innerText = '⏸';
         closeOverlay();
@@ -210,16 +202,12 @@
 
     function toggleFS() {
         const el = document.getElementById('player-box');
-        if (!document.fullscreenElement) {
-            el.requestFullscreen().catch(err => {});
-        } else {
-            document.exitFullscreen();
-        }
+        if (!document.fullscreenElement) el.requestFullscreen();
+        else document.exitFullscreen();
     }
 
     document.addEventListener('fullscreenchange', () => {
-        const btn = document.getElementById('exit-fs');
-        btn.style.display = document.fullscreenElement ? 'block' : 'none';
+        document.getElementById('exit-fs').style.display = document.fullscreenElement ? 'block' : 'none';
     });
 
     function playNext() { play((currentIndex + 1) % videoData.length); }
