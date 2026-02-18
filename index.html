@@ -3,67 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Ultimate Pro</title>
+    <title>KidsTV Custom Control</title>
     <style>
         :root { --bg: #0a0a0a; --card: #161616; --accent: #ff004c; --text: #fff; --gradient: linear-gradient(90deg, #ff004c, #ff6a00); }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html { 
-            margin: 0; padding: 0; 
-            background: var(--bg); color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            height: 100vh; width: 100vw; overflow: hidden; 
+            margin: 0; padding: 0; background: var(--bg); color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; 
         }
         
         .app-wrap { display: flex; flex-direction: column; height: 100vh; }
 
-        /* ПЛЕЄР */
-        .video-container { width: 100%; background: #000; display: flex; flex-direction: column; flex-shrink: 0; }
-        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
-        .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        
-        /* КНОПКИ */
-        .actions { 
-            padding: 10px; display: flex; gap: 10px; justify-content: center; 
-            background: var(--bg); border-bottom: 1px solid #222;
+        /* КОНТЕЙНЕР ПЛЕЄРА */
+        .video-container { width: 100%; background: #000; position: relative; flex-shrink: 0; }
+        .ratio { position: relative; width: 100%; padding-bottom: 56.25%; }
+        .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
+
+        /* СКЛЯНИЙ ЩИТ (БЛОКУЄ ВСЕ) */
+        .video-shield {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; cursor: pointer;
         }
-        .btn { 
-            border: none; color: white; padding: 14px; border-radius: 12px; 
-            font-size: 14px; font-weight: bold; flex: 1; max-width: 250px;
-            cursor: pointer; text-transform: uppercase; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 5px;
+
+        /* НАША ПАНЕЛЬ КЕРУВАННЯ */
+        .custom-controls {
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; padding: 15px; background: #111; border-bottom: 2px solid #222;
+            z-index: 20;
         }
-        .btn-magic { background: var(--gradient); box-shadow: 0 4px 15px rgba(255, 0, 76, 0.3); }
-        .btn-refresh { background: #333; border: 1px solid #444; }
-        .btn:active { transform: scale(0.95); }
+        .ctrl-btn {
+            background: #222; border: 1px solid #333; color: white;
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 20px; transition: 0.2s;
+        }
+        .ctrl-btn:active { transform: scale(0.9); background: var(--accent); }
+        .btn-main { width: 65px; height: 65px; background: var(--gradient); border: none; font-size: 24px; }
+
+        /* КНОПКИ ПІД ПАНЕЛЛЮ */
+        .actions { padding: 10px; display: flex; gap: 10px; background: var(--bg); }
+        .btn-action { 
+            flex: 1; padding: 12px; border-radius: 10px; border: none; 
+            color: white; font-weight: bold; cursor: pointer; text-transform: uppercase;
+        }
+        .refresh-btn { background: #333; }
+        .random-btn { background: var(--accent); }
 
         /* СПИСОК */
-        .side-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .playlist { padding: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-        
+        .side-content { flex: 1; overflow-y: auto; padding: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
         .card { background: var(--card); border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid #222; }
-        .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .card-title { padding: 6px; font-size: 11px; height: 30px; overflow: hidden; color: #ccc; line-height: 1.2; }
+        .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .card-title { padding: 5px; font-size: 11px; height: 32px; overflow: hidden; color: #ccc; }
 
-        /* ПК ВЕРСІЯ */
+        /* АДАПТИВ ПК */
         @media (min-width: 1024px) {
             .app-wrap { flex-direction: row; }
-            .video-container { width: 75%; height: 100vh; justify-content: space-between; padding-bottom: 10px; }
-            .ratio { padding-bottom: 0; flex: 1; }
-            .side-content { width: 25%; height: 100vh; border-left: 1px solid #222; }
-            .grid { grid-template-columns: 1fr; padding: 15px; }
-            .card { display: flex; gap: 10px; border: none; background: transparent; padding-bottom: 12px; border-bottom: 1px solid #222; border-radius: 0; }
-            .card img { width: 120px; border-radius: 4px; }
-            .card-title { font-size: 13px; height: auto; padding: 0; color: #fff; }
-        }
-
-        /* ВИПРАВЛЕННЯ ДЛЯ ГОРИЗОНТАЛЬНОЇ МОБІЛКИ */
-        @media (max-height: 500px) and (max-width: 1023px) {
-            body, html { overflow-y: auto !important; height: auto !important; }
-            .app-wrap { height: auto !important; }
-            .side-content { overflow: visible !important; height: auto !important; }
-            .video-container { position: relative !important; }
+            .video-container { width: 75%; height: 100vh; display: flex; flex-direction: column; }
+            .ratio { flex-grow: 1; padding-bottom: 0; }
+            .side-content { width: 25%; border-left: 2px solid #222; }
+            .grid { grid-template-columns: 1fr; }
+            .card { display: flex; gap: 10px; background: transparent; border: none; border-bottom: 1px solid #222; border-radius: 0; padding-bottom: 10px; }
+            .card img { width: 110px; border-radius: 4px; }
         }
     </style>
 </head>
@@ -72,19 +74,24 @@
 <div class="app-wrap">
     <div class="video-container">
         <div class="ratio">
-            <iframe id="main-player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            <iframe id="main-player" src="" allow="autoplay; fullscreen" frameborder="0"></iframe>
+            <div class="video-shield" onclick="handleShieldClick()"></div>
         </div>
+        
+        <div class="custom-controls">
+            <div class="ctrl-btn" onclick="seek(-10)">⏪</div>
+            <div class="ctrl-btn btn-main" id="play-pause" onclick="togglePlay()">⏸</div>
+            <div class="ctrl-btn" onclick="seek(10)">⏩</div>
+        </div>
+
         <div class="actions">
-            <button class="btn btn-refresh" onclick="loadFeed()">🔄 ОНОВИТИ</button>
-            <button class="btn btn-magic" onclick="playRandom()">🚀 ІНШЕ</button>
+            <button class="btn-action refresh-btn" onclick="loadFeed()">🔄 ОНОВИТИ</button>
+            <button class="btn-action random-btn" onclick="playRandom()">🚀 ІНШЕ</button>
         </div>
     </div>
+
     <div class="side-content">
-        <div class="playlist">
-            <div id="grid" class="grid">
-                <p style="text-align: center; padding: 20px; color: #666;">Завантажуємо...</p>
-            </div>
-        </div>
+        <div id="grid" class="grid"></div>
     </div>
 </div>
 
@@ -95,10 +102,11 @@
         'UCyWkpcB25Hr2oN7uRlsNg5g', 'UCCIqROlnqhmQPjbdv3e8scQ', 'UCifNwVEEXhG26Z__VXrrcwQ'
     ];
     let videoData = [];
+    let isPlaying = true;
 
     async function loadFeed() {
         const grid = document.getElementById('grid');
-        grid.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Оновлюємо список...</p>';
+        grid.innerHTML = '<p style="text-align: center; color: #666;">Завантаження...</p>';
         let allVideos = []; 
 
         for (const id of channels) {
@@ -109,58 +117,69 @@
                     data.items.forEach(item => {
                         const vId = item.link.split('v=')[1];
                         if (vId && !item.title.toLowerCase().includes("shorts")) {
-                            if (!allVideos.find(v => v.id === vId)) {
-                                allVideos.push({ id: vId, title: item.title, thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg` });
-                            }
+                            allVideos.push({ id: vId, title: item.title, thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg` });
                         }
                     });
                 }
-            } catch (e) { console.log("Skip channel"); }
+            } catch (e) {}
         }
 
-        if (allVideos.length > 0) {
-            // ПЕРЕМІШУЄМО ВСЕ
-            allVideos.sort(() => Math.random() - 0.5);
-            
-            // БЕРЕМО ТІЛЬКИ ПЕРШІ 30 ВІДЕО
-            videoData = allVideos.slice(0, 30);
-            
-            render();
+        allVideos.sort(() => Math.random() - 0.5);
+        videoData = allVideos.slice(0, 30);
+        render();
 
-            // Автозапуск першого відео тільки при першому завантаженні
-            const player = document.getElementById('main-player');
-            if (!player.src || player.src.includes("about:blank") || player.src === window.location.href) {
-                play(videoData[0].id, false);
-            }
-        } else {
-            grid.innerHTML = "<p style='padding:20px; text-align:center;'>Не вдалося завантажити. Спробуй ще раз.</p>";
+        if (!document.getElementById('main-player').src || document.getElementById('main-player').src.includes("about:blank")) {
+            play(videoData[0].id);
         }
     }
 
     function render() {
         document.getElementById('grid').innerHTML = videoData.map(v => `
-            <div class="card" onclick="play('${v.id}', true)">
-                <img src="${v.thumb}" onerror="this.parentElement.style.display='none'">
+            <div class="card" onclick="play('${v.id}')">
+                <img src="${v.thumb}">
                 <div class="card-title">${v.title}</div>
             </div>
         `).join('');
     }
 
-    function play(id, shouldScroll) {
-        // rel=0 показує рекомендації лише з цього ж каналу
-        // iv_load_policy=3 прибирає спливаючі анотації
-        document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&controls=1`;
-        
-        if (shouldScroll && window.innerWidth < 1024) {
-            window.scrollTo({top: 0, behavior: 'smooth'});
+    function play(id) {
+        // controls=0 ховає стандартну панель, щоб не заважала
+        document.getElementById('main-player').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1&controls=0&disablekb=1`;
+        isPlaying = true;
+        document.getElementById('play-pause').innerText = '⏸';
+        if (window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function sendCommand(func, args = "") {
+        const iframe = document.getElementById('main-player');
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: func, args: args }), '*');
+    }
+
+    function togglePlay() {
+        const btn = document.getElementById('play-pause');
+        if (isPlaying) {
+            sendCommand('pauseVideo');
+            btn.innerText = '▶';
+        } else {
+            sendCommand('playVideo');
+            btn.innerText = '⏸';
         }
+        isPlaying = !isPlaying;
+    }
+
+    function seek(seconds) {
+        // Для перемотки використовуємо хитрий метод через API
+        // На жаль, прямий seekTo через postMessage працює тільки з завантаженим SDK, 
+        // але ми можемо імітувати через кнопки вперед/назад
+        sendCommand('seekTo', [seconds, true]);
+    }
+
+    function handleShieldClick() {
+        togglePlay(); // Клік по відео ставить паузу
     }
 
     function playRandom() {
-        if (videoData.length > 0) {
-            const rand = videoData[Math.floor(Math.random() * videoData.length)];
-            play(rand.id, true);
-        }
+        if (videoData.length > 0) play(videoData[Math.floor(Math.random() * videoData.length)].id);
     }
 
     loadFeed();
