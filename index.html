@@ -18,7 +18,7 @@
         .app-wrap { display: flex; flex-direction: column; height: 100vh; }
 
         /* ПЛЕЄР */
-        .video-container { width: 100%; background: #000; display: flex; flex-direction: column; }
+        .video-container { width: 100%; background: #000; display: flex; flex-direction: column; flex-shrink: 0; }
         .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         
@@ -57,6 +57,14 @@
             .card img { width: 120px; border-radius: 4px; }
             .card-title { font-size: 13px; height: auto; padding: 0; color: #fff; }
         }
+
+        /* ВИПРАВЛЕННЯ ДЛЯ ГОРИЗОНТАЛЬНОЇ МОБІЛКИ */
+        @media (max-height: 500px) and (max-width: 1023px) {
+            body, html { overflow-y: auto !important; height: auto !important; }
+            .app-wrap { height: auto !important; }
+            .side-content { overflow: visible !important; height: auto !important; }
+            .video-container { position: relative !important; }
+        }
     </style>
 </head>
 <body>
@@ -81,13 +89,20 @@
 </div>
 
 <script>
-    const channels = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC0Vf_i2h75sJM13bD9LixIg', 'UCcrAG9d_PifNP78aaJe5S2A', 'UC_8PAD0Qmi6_gpe77S1Atgg', 'UCcartHVtvAUzfajflyeT_Gg', 'UCBw2WWpuadpPQKVKNZilDkg'];
+    const channels = [
+        'UCiDMw6_5dn59S8S-S_Vr23A', 
+        'UC0Vf_i2h75sJM13bD9LixIg', 
+        'UCcrAG9d_PifNP78aaJe5S2A', 
+        'UC_8PAD0Qmi6_gpe77S1Atgg', 
+        'UCcartHVtvAUzfajflyeT_Gg', 
+        'UCBw2WWpuadpPQKVKNZilDkg'
+    ];
     let videoData = [];
 
     async function loadFeed() {
         const grid = document.getElementById('grid');
         grid.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Оновлюємо список...</p>';
-        videoData = []; // Очищуємо старі дані
+        videoData = []; 
 
         for (const id of channels) {
             try {
@@ -107,9 +122,9 @@
         }
 
         if (videoData.length > 0) {
+            // Чесний рандом
             videoData.sort(() => Math.random() - 0.5);
             render();
-            // Якщо плеєр порожній, запускаємо перше відео
             if (!document.getElementById('main-player').src || document.getElementById('main-player').src.includes("about:blank")) {
                 play(videoData[0].id, false);
             }
@@ -129,7 +144,9 @@
 
     function play(id, shouldScroll) {
         document.getElementById('main-player').src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
-        if (shouldScroll && window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
+        if (shouldScroll && window.innerWidth < 1024) {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
     }
 
     function playRandom() {
