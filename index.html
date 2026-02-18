@@ -3,27 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV - Mobile Fix</title>
+    <title>KidsTV Pro</title>
     <style>
-        :root { --bg: #0f0f0f; --surface: #1e1e1e; --accent: #ff0000; --text: #ffffff; }
-        body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: sans-serif; height: 100%; overflow-x: hidden; }
-        
-        .app-container { display: flex; flex-direction: column; min-height: 100vh; }
+        :root {
+            --bg: #0a0a0a;
+            --card-bg: #161616;
+            --accent: #ff004c;
+            --text: #ffffff;
+        }
 
-        /* Фіксована зона плеєра для мобільних */
-        .video-section {
-            width: 100%;
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .app-shell {
+            display: grid;
+            grid-template-areas: "player sidebar";
+            grid-template-columns: 1fr 350px;
+            height: 100vh;
+        }
+
+        /* ЗОНА ПЛЕЄРА */
+        .player-zone {
+            grid-area: player;
+            display: flex;
+            flex-direction: column;
             background: #000;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            border-right: 1px solid #222;
         }
 
         .video-container {
+            flex-grow: 1;
             position: relative;
-            width: 100%;
-            padding-bottom: 56.25%; /* Співвідношення 16:9 */
-            height: 0;
         }
 
         .video-container iframe {
@@ -32,107 +46,162 @@
             border: none;
         }
 
-        .header {
-            padding: 10px 15px;
-            background: var(--surface);
+        .controls {
+            padding: 15px 25px;
+            background: #111;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #333;
+            justify-content: center;
         }
 
-        .btn-next {
-            background: var(--accent);
-            color: white; border: none;
-            padding: 8px 16px; border-radius: 6px;
-            font-weight: bold; cursor: pointer;
+        .btn-main {
+            background: linear-gradient(45deg, var(--accent), #ff6a00);
+            border: none; color: white;
+            padding: 15px 40px; border-radius: 12px;
+            font-size: 18px; font-weight: bold;
+            cursor: pointer; width: 100%; max-width: 400px;
+            box-shadow: 0 4px 20px rgba(255, 0, 76, 0.3);
         }
 
-        .playlist-section { padding: 10px; flex-grow: 1; }
-
-        .video-item {
-            display: flex; gap: 10px; margin-bottom: 12px;
-            cursor: pointer; background: #1a1a1a;
-            border-radius: 8px; overflow: hidden;
+        /* ЗОНА СПИСКУ (САЙДБАР) */
+        .sidebar {
+            grid-area: sidebar;
+            overflow-y: auto;
+            background: var(--bg);
+            padding: 15px;
         }
 
-        .video-item img { width: 120px; aspect-ratio: 16/9; object-fit: cover; }
-        .video-title { font-size: 13px; padding: 5px; line-height: 1.3; overflow: hidden; }
-
-        /* Налаштування для ПК */
-        @media (min-width: 1000px) {
-            .app-container { flex-direction: row; }
-            .video-section { position: relative; flex: 1; height: 100vh; display: flex; align-items: center; padding: 20px; box-sizing: border-box; }
-            .playlist-section { width: 380px; height: 100vh; overflow-y: auto; border-left: 1px solid #333; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
         }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #222;
+        }
+
+        .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+        .card img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-title {
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.4;
+            color: #ccc;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* МОБІЛЬНА ВЕРСІЯ */
+        @media (max-width: 1024px) {
+            .app-shell {
+                grid-template-areas: "player" "sidebar";
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .player-zone {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .video-container {
+                padding-bottom: 56.25%; /* 16:9 */
+                height: 0;
+            }
+
+            .sidebar {
+                padding: 10px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="video-section">
+<div class="app-shell">
+    <div class="player-zone">
         <div class="video-container">
-            <iframe id="player" 
-                    src="" 
-                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media" 
-                    allowfullscreen>
-            </iframe>
+            <iframe id="main-player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
         </div>
-        <div class="header">
-            <span style="font-size: 14px; font-weight: bold;">KidsTV</span>
-            <button class="btn-next" onclick="playRandom()">🚀 ІНШЕ</button>
+        <div class="controls">
+            <button class="btn-main" onclick="playRandom()">🚀 ІНШЕ ВІДЕО</button>
         </div>
     </div>
 
-    <div class="playlist-section" id="playlist"></div>
+    <div class="sidebar">
+        <div id="video-grid" class="grid">
+            </div>
+    </div>
 </div>
 
 <script>
     const API_KEY = 'AIzaSyCnUi9wAbsDwiq0FPYiVKLWIgyKHLDKFig';
-    const channelIds = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
-    let videos = [];
+    const channels = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC_qs3c6ehD78pntpUo_T_Gg', 'UC4S7X8LNoq8m6_Yf_7S6yqA'];
+    let allVideos = [];
 
-    async function loadContent() {
-        for (const id of channelIds) {
+    async function start() {
+        for (const id of channels) {
             try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${id}&part=snippet&maxResults=20&type=video&videoEmbeddable=true`);
-                const data = await res.json();
-                if (data.items) {
-                    data.items.forEach(v => videos.push({id: v.id.videoId, title: v.snippet.title, thumb: v.snippet.thumbnails.medium.url}));
+                const url = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${id}&part=snippet&maxResults=15&type=video&videoEmbeddable=true`;
+                const r = await fetch(url);
+                const d = await r.json();
+                if (d.items) {
+                    d.items.forEach(v => allVideos.push({
+                        id: v.id.videoId,
+                        title: v.snippet.title,
+                        thumb: v.snippet.thumbnails.high ? v.snippet.thumbnails.high.url : v.snippet.thumbnails.medium.url
+                    }));
                 }
             } catch (e) {}
         }
-        videos.sort(() => Math.random() - 0.5);
+        allVideos.sort(() => Math.random() - 0.5);
         render();
-        if (videos.length > 0) playVideo(videos[0].id);
+        if(allVideos.length > 0) load(allVideos[0].id);
     }
 
     function render() {
-        document.getElementById('playlist').innerHTML = videos.map(v => `
-            <div class="video-item" onclick="playVideo('${v.id}')">
+        document.getElementById('video-grid').innerHTML = allVideos.map(v => `
+            <div class="card" onclick="load('${v.id}')">
                 <img src="${v.thumb}">
-                <div class="video-title">${v.title}</div>
+                <div class="card-title">${v.title}</div>
             </div>
         `).join('');
     }
 
-    function playVideo(id) {
-        // Параметр fs=1 дозволяє кнопку повного екрану
-        // Параметр rel=0 обмежує рекомендації лише вашим каналом (якщо можливо)
-        const player = document.getElementById('player');
-        player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&fs=1&playsinline=0`;
-        
-        if (window.innerWidth < 1000) {
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+    function load(id) {
+        const p = document.getElementById('main-player');
+        p.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&fs=1`;
+        if(window.innerWidth <= 1024) window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     function playRandom() {
-        const rand = videos[Math.floor(Math.random() * videos.length)];
-        if(rand) playVideo(rand.id);
+        const rand = allVideos[Math.floor(Math.random() * allVideos.length)];
+        if(rand) load(rand.id);
     }
 
-    loadContent();
+    start();
 </script>
 </body>
 </html>
