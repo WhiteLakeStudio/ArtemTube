@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KidsTV Ultimate Fixed</title>
+    <title>KidsTV Ultimate Pro</title>
     <style>
-        :root { --bg: #0a0a0a; --card: #161616; --accent: #ff004c; --text: #fff; }
+        :root { --bg: #0a0a0a; --card: #161616; --accent: #ff004c; --text: #fff; --gradient: linear-gradient(90deg, #ff004c, #ff6a00); }
         * { box-sizing: border-box; }
 
         body, html { 
@@ -17,31 +17,28 @@
         
         .app-wrap { display: flex; flex-direction: column; height: 100vh; }
 
-        /* ПЛЕЄР КОНТЕЙНЕР */
-        .video-container { 
-            width: 100%; background: #000; 
-            display: flex; flex-direction: column;
-        }
+        /* ПЛЕЄР */
+        .video-container { width: 100%; background: #000; display: flex; flex-direction: column; }
         .ratio { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
         .ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         
+        /* КНОПКИ */
         .actions { 
-            padding: 10px; display: flex; justify-content: center; 
+            padding: 10px; display: flex; gap: 10px; justify-content: center; 
             background: var(--bg); border-bottom: 1px solid #222;
         }
-        .btn-magic { 
-            background: linear-gradient(90deg, #ff004c, #ff6a00); 
-            border: none; color: white; padding: 15px; border-radius: 12px; 
-            font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; 
+        .btn { 
+            border: none; color: white; padding: 14px; border-radius: 12px; 
+            font-size: 14px; font-weight: bold; flex: 1; max-width: 250px;
             cursor: pointer; text-transform: uppercase; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
         }
-        .btn-magic:active { transform: scale(0.98); }
+        .btn-magic { background: var(--gradient); box-shadow: 0 4px 15px rgba(255, 0, 76, 0.3); }
+        .btn-refresh { background: #333; border: 1px solid #444; }
+        .btn:active { transform: scale(0.95); }
 
         /* СПИСОК */
-        .side-content { 
-            flex: 1; overflow-y: auto; 
-            -webkit-overflow-scrolling: touch;
-        }
+        .side-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .playlist { padding: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
         
@@ -49,23 +46,14 @@
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
         .card-title { padding: 6px; font-size: 11px; height: 30px; overflow: hidden; color: #ccc; line-height: 1.2; }
 
-        /* ПК ВЕРСІЯ: ВИПРАВЛЕННЯ ЗАРІЗАННЯ */
+        /* ПК ВЕРСІЯ */
         @media (min-width: 1024px) {
             .app-wrap { flex-direction: row; }
-            .video-container { 
-                width: 75%; height: 100vh; 
-                justify-content: space-between; /* Кнопка завжди внизу */
-                padding-bottom: 20px;
-            }
-            .ratio { padding-bottom: 0; flex: 1; } /* Плеєр розтягується на весь залишок */
-            
+            .video-container { width: 75%; height: 100vh; justify-content: space-between; padding-bottom: 10px; }
+            .ratio { padding-bottom: 0; flex: 1; }
             .side-content { width: 25%; height: 100vh; border-left: 1px solid #222; }
             .grid { grid-template-columns: 1fr; padding: 15px; }
-            .card { 
-                display: flex; gap: 10px; border: none; 
-                background: transparent; padding-bottom: 12px; 
-                border-bottom: 1px solid #222; border-radius: 0; 
-            }
+            .card { display: flex; gap: 10px; border: none; background: transparent; padding-bottom: 12px; border-bottom: 1px solid #222; border-radius: 0; }
             .card img { width: 120px; border-radius: 4px; }
             .card-title { font-size: 13px; height: auto; padding: 0; color: #fff; }
         }
@@ -79,23 +67,28 @@
             <iframe id="main-player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
         </div>
         <div class="actions">
-            <button class="btn-magic" onclick="playRandom()">🚀 ІНШЕ ВІДЕО</button>
+            <button class="btn btn-refresh" onclick="loadFeed()">🔄 ОНОВИТИ</button>
+            <button class="btn btn-magic" onclick="playRandom()">🚀 ІНШЕ</button>
         </div>
     </div>
     <div class="side-content">
         <div class="playlist">
             <div id="grid" class="grid">
-                <p id="loader" style="text-align: center; padding: 20px; color: #666;">Завантажуємо...</p>
+                <p style="text-align: center; padding: 20px; color: #666;">Завантажуємо...</p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const channels = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC0Vf_i2h75sJM13bD9LixIg', 'UCcrAG9d_PifNP78aaJe5S2A'];
+    const channels = ['UCiDMw6_5dn59S8S-S_Vr23A', 'UC0Vf_i2h75sJM13bD9LixIg', 'UCcrAG9d_PifNP78aaJe5S2A', 'UC_8PAD0Qmi6_gpe77S1Atgg', 'UCcartHVtvAUzfajflyeT_Gg', 'UCBw2WWpuadpPQKVKNZilDkg'];
     let videoData = [];
 
     async function loadFeed() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Оновлюємо список...</p>';
+        videoData = []; // Очищуємо старі дані
+
         for (const id of channels) {
             try {
                 const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id=' + id)}`);
@@ -104,16 +97,24 @@
                     data.items.forEach(item => {
                         const vId = item.link.split('v=')[1];
                         if (vId && !item.title.toLowerCase().includes("shorts")) {
-                            videoData.push({ id: vId, title: item.title, thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg` });
+                            if (!videoData.find(v => v.id === vId)) {
+                                videoData.push({ id: vId, title: item.title, thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg` });
+                            }
                         }
                     });
                 }
-            } catch (e) { console.log("Skip"); }
+            } catch (e) { console.log("Skip channel"); }
         }
+
         if (videoData.length > 0) {
             videoData.sort(() => Math.random() - 0.5);
             render();
-            play(videoData[0].id, false);
+            // Якщо плеєр порожній, запускаємо перше відео
+            if (!document.getElementById('main-player').src || document.getElementById('main-player').src.includes("about:blank")) {
+                play(videoData[0].id, false);
+            }
+        } else {
+            grid.innerHTML = "<p style='padding:20px; text-align:center;'>Не вдалося завантажити. Спробуй ще раз.</p>";
         }
     }
 
@@ -132,7 +133,10 @@
     }
 
     function playRandom() {
-        if (videoData.length > 0) play(videoData[Math.floor(Math.random() * videoData.length)].id, true);
+        if (videoData.length > 0) {
+            const rand = videoData[Math.floor(Math.random() * videoData.length)];
+            play(rand.id, true);
+        }
     }
 
     loadFeed();
