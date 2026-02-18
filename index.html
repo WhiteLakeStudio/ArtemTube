@@ -77,34 +77,36 @@
         
         for (const id of channels) {
             try {
-                // Використовуємо count=50, щоб спробувати отримати більше відео
+                // Використовуємо AllOrigins проксі для стабільності
                 const rss = `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`;
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=50`);
-                const data = await res.json();
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rss)}`);
+                const json = await res.json();
                 
-                if (data.items) {
-                    data.items.forEach(item => {
-                        const vId = item.link.split('v=')[1];
-                        const title = item.title.toLowerCase();
-                        
-                        // Покращена фільтрація Shorts та сміття
-                        if (vId && !title.includes("#shorts") && !title.includes("shorts")) {
-                            // Перевіряємо, чи такого відео ще немає в списку
-                            if (!videoData.find(v => v.id === vId)) {
-                                videoData.push({
-                                    id: vId,
-                                    title: item.title,
-                                    thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg`
-                                });
-                            }
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(json.contents, "text/xml");
+                const entries = xml.querySelectorAll("entry");
+                
+                entries.forEach(entry => {
+                    const vId = entry.querySelector("videoId").textContent;
+                    const title = entry.querySelector("title").textContent;
+                    const lowTitle = title.toLowerCase();
+                    
+                    // ФІЛЬТР: Прибираємо Shorts та порожні відео
+                    if (vId && !lowTitle.includes("#shorts") && !lowTitle.includes("shorts")) {
+                        if (!videoData.find(v => v.id === vId)) {
+                            videoData.push({
+                                id: vId,
+                                title: title,
+                                thumb: `https://img.youtube.com/vi/${vId}/mqdefault.jpg`
+                            });
                         }
-                    });
-                }
+                    }
+                });
             } catch (e) { console.error("RSS error for channel " + id); }
         }
 
         if (videoData.length > 0) {
-            // ФІШЕР-ЙЕЙТС РАНДОМІЗАЦІЯ (набагато краща за sort)
+            // РОЗУМНИЙ РАНДОМ (Fisher-Yates)
             for (let i = videoData.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [videoData[i], videoData[j]] = [videoData[j], videoData[i]];
@@ -142,7 +144,6 @@
         play(rand.id, true);
     }
 
-    // Запуск
     loadFeed();
 </script>
 </body>
